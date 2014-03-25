@@ -80,8 +80,8 @@ public class OsmParser {
 			nodes = new HashMap<>();
 			ways = new LinkedList<>();
 
-			minLat = 48;
-			minLon = 16;
+			minLat = 0;
+			minLon = 0;
 			maxLat = 0;
 			maxLon = 0;
 		}
@@ -125,18 +125,6 @@ public class OsmParser {
 						}
 
 						ways.add(way);
-
-						for (WayNode wayNode : way.getWayNodes()) {
-							Long nodeId = wayNode.getNodeId();
-							Node node = nodes.get(nodeId);
-							if (node == null) {
-								System.err
-										.println("fatal error! unknown node: "
-												+ nodeId);
-
-								return;
-							}
-						}
 					} else {
 						System.out.println("unknown entity: "
 								+ entity.getType());
