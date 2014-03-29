@@ -19,11 +19,8 @@ import org.openstreetmap.osmosis.core.domain.v0_6.Way;
 import org.openstreetmap.osmosis.core.domain.v0_6.WayNode;
 
 public class MapsRacer {
-
 	private static OsmParser parser;
-
 	private static MeinStern routing;
-
 	private static MapPanel mapPanel;
 
 	public static void main(String[] args) throws FileNotFoundException {
@@ -38,6 +35,7 @@ public class MapsRacer {
 		frame.setLocationRelativeTo(null);
 		frame.add(mapPanel);
 		frame.setSize(1024, 1024);
+		frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		frame.setVisible(true);
 
 		new Thread() {
