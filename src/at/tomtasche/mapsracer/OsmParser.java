@@ -72,13 +72,21 @@ public class OsmParser {
 		private double maxLon;
 
 		private final Map<Long, Node> nodes;
+		private final Map<Node, List<Node>> nodeLinks;
 		private final List<Way> ways;
+
+		private final MeinStern routing;
+		private List<Node> path;
 
 		public MapPanel(File osmFile) {
 			this.osmFile = osmFile;
 
 			nodes = new HashMap<>();
+			nodeLinks = new HashMap<>();
 			ways = new LinkedList<>();
+
+			routing = new MeinStern();
+			path = new LinkedList<>();
 
 			minLat = 0;
 			minLon = 0;
@@ -125,6 +133,25 @@ public class OsmParser {
 						}
 
 						ways.add(way);
+
+						List<WayNode> wayNodes = way.getWayNodes();
+						for (int i = 0; i < wayNodes.size(); i++) {
+							WayNode wayNode = wayNodes.get(i);
+							Node node = toNode(wayNode);
+
+							List<Node> links = nodeLinks.get(node);
+							if (links == null) {
+								links = new LinkedList<>();
+								nodeLinks.put(node, links);
+							}
+
+							if (i - 1 >= 0) {
+								links.add(toNode(wayNodes.get(i - 1)));
+							}
+							if (i + 1 < wayNodes.size()) {
+								links.add(toNode(wayNodes.get(i + 1)));
+							}
+						}
 					} else {
 						System.out.println("unknown entity: "
 								+ entity.getType());
@@ -137,6 +164,13 @@ public class OsmParser {
 
 				@Override
 				public void complete() {
+					routing.initialize(nodeLinks);
+
+					Node start = toNode(ways.get(1).getWayNodes().get(1));
+
+					Node end = toNode(ways.get(5).getWayNodes().get(0));
+
+					path = routing.search(start, end);
 				}
 
 				@Override
@@ -161,48 +195,67 @@ public class OsmParser {
 			});
 		}
 
+		private Node toNode(WayNode wayNode) {
+			Node node = nodes.get(wayNode.getNodeId());
+			if (node == null) {
+				System.err.println("unknown node: " + wayNode.getNodeId());
+			}
+
+			return node;
+		}
+
 		@Override
 		public void paint(Graphics g) {
 			super.paint(g);
 
 			Graphics2D g2d = (Graphics2D) g;
+
 			g2d.setColor(Color.BLACK);
-
 			for (Way way : ways) {
-				Node lastNode = null;
+				boolean nameDrawn = false;
+				List<Node> pathNodes = new LinkedList<>();
 				for (WayNode wayNode : way.getWayNodes()) {
-					Long nodeId = wayNode.getNodeId();
-					Node node = nodes.get(nodeId);
-					if (node == null) {
-						System.err.println("unknown node: " + nodeId);
+					Node node = toNode(wayNode);
+					pathNodes.add(node);
 
-						continue;
-					}
-
-					if (lastNode != null) {
-						g2d.drawLine(calculateX(lastNode.getLongitude()),
-								calculateY(lastNode.getLatitude()),
-								calculateX(node.getLongitude()),
-								calculateY(node.getLatitude()));
-					} else {
-						String name = "none";
-						for (Tag tag : way.getTags()) {
-							if (!tag.getKey().equals("name")) {
-								continue;
-							} else {
-								name = tag.getValue();
-							}
-						}
-
+					if (!nameDrawn) {
 						if (SHOW_NAMES) {
+							String name = "unknown name";
+							for (Tag tag : way.getTags()) {
+								if (!tag.getKey().equals("name")) {
+									continue;
+								} else {
+									name = tag.getValue();
+								}
+							}
+
 							g2d.drawString(name,
 									calculateX(node.getLongitude()),
 									calculateY(node.getLatitude()));
 						}
-					}
 
-					lastNode = node;
+						nameDrawn = true;
+					}
 				}
+
+				drawPath(pathNodes, g2d);
+			}
+
+			g2d.setColor(Color.RED);
+			drawPath(path, g2d);
+		}
+
+		private void drawPath(List<Node> pathNodes, Graphics2D g2d) {
+			Node lastNode = null;
+
+			for (Node node : pathNodes) {
+				if (lastNode != null) {
+					g2d.drawLine(calculateX(lastNode.getLongitude()),
+							calculateY(lastNode.getLatitude()),
+							calculateX(node.getLongitude()),
+							calculateY(node.getLatitude()));
+				}
+				lastNode = node;
 			}
 		}
 
