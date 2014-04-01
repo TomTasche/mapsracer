@@ -14,6 +14,12 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 
+import org.jdesktop.swingx.JXMapViewer;
+import org.jdesktop.swingx.OSMTileFactoryInfo;
+import org.jdesktop.swingx.mapviewer.DefaultTileFactory;
+import org.jdesktop.swingx.mapviewer.GeoPosition;
+import org.jdesktop.swingx.mapviewer.TileFactoryInfo;
+
 import at.tomtasche.mapsracer.map.MapConverter;
 import at.tomtasche.mapsracer.map.MapNode;
 import at.tomtasche.mapsracer.map.MapPath;
@@ -35,11 +41,23 @@ public class MapsRacer {
 		mapPanel = new MapPanel();
 
 		JScrollPane scrollPane = new JScrollPane(mapPanel);
+		
+		JXMapViewer mapViewer = new JXMapViewer();
 
+		TileFactoryInfo info = new OSMTileFactoryInfo();
+		DefaultTileFactory tileFactory = new DefaultTileFactory(info);
+		tileFactory.setThreadPoolSize(8);
+
+		mapViewer.setTileFactory(tileFactory);
+
+		mapViewer.setZoom(3);
+		// TODO: fetch .osm-file according to this GeoPosition
+		mapViewer.setAddressLocation(new GeoPosition(48.1768, 16.3498));
+		
 		frame = new JFrame();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setLocationRelativeTo(null);
-		frame.add(scrollPane);
+		frame.add(mapViewer);
 		frame.setSize(512, 512);
 		frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		frame.setVisible(true);
@@ -117,7 +135,6 @@ public class MapsRacer {
 
 		private void drawPath(MapPath path, Graphics2D g2d) {
 			MapNode lastNode = null;
-
 			for (MapNode node : path.getNodes()) {
 				if (lastNode != null) {
 					boolean nameDrawn = false;
