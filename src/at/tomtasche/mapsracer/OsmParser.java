@@ -23,11 +23,28 @@ public class OsmParser {
 	private static final List<String> STREET_DISQUALIFIERS;
 
 	static {
+		// http://wiki.openstreetmap.org/wiki/Key:highway
 		STREET_DISQUALIFIERS = new LinkedList<>();
 		STREET_DISQUALIFIERS.add("footway");
+		STREET_DISQUALIFIERS.add("bridleway");
 		STREET_DISQUALIFIERS.add("steps");
-		STREET_DISQUALIFIERS.add("cycleway");
 		STREET_DISQUALIFIERS.add("path");
+		STREET_DISQUALIFIERS.add("cycleway");
+		STREET_DISQUALIFIERS.add("proposed");
+		STREET_DISQUALIFIERS.add("construction");
+		STREET_DISQUALIFIERS.add("bus_stop");
+		STREET_DISQUALIFIERS.add("crossing");
+		STREET_DISQUALIFIERS.add("emergency_access_point");
+		STREET_DISQUALIFIERS.add("bus_stop");
+		STREET_DISQUALIFIERS.add("escape");
+		STREET_DISQUALIFIERS.add("give_way");
+		STREET_DISQUALIFIERS.add("passing_place");
+		STREET_DISQUALIFIERS.add("rest_area");
+		STREET_DISQUALIFIERS.add("speed_camera");
+		STREET_DISQUALIFIERS.add("street_lamp");
+		STREET_DISQUALIFIERS.add("services");
+		STREET_DISQUALIFIERS.add("stop");
+		STREET_DISQUALIFIERS.add("traffic_signals");
 	}
 
 	private File osmFile;
