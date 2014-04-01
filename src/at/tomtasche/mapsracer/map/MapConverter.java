@@ -57,7 +57,12 @@ public final class MapConverter {
 			streets.add(path);
 		}
 
-		return new OsmMap(streets, streetGraph);
+		double mapWidth = distFrom(parser.getMinLat(), parser.getMinLon(),
+				parser.getMinLat(), parser.getMaxLon());
+		double mapHeight = distFrom(parser.getMinLat(), parser.getMinLon(),
+				parser.getMaxLat(), parser.getMinLon());
+
+		return new OsmMap((int) mapWidth, (int) mapHeight, streets, streetGraph);
 	}
 
 	private static MapNode toMapNode(OsmParser parser, WayNode wayNode) {
@@ -68,9 +73,7 @@ public final class MapConverter {
 		int x = calculateX(parser, node);
 		int y = calculateY(parser, node);
 
-		MapNode mapNode = new MapNode(x, y);
-
-		return mapNode;
+		return new MapNode(x, y);
 	}
 
 	private static int calculateX(OsmParser parser, Node node) {
