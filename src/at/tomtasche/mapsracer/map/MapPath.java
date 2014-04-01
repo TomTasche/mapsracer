@@ -4,10 +4,21 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class MapPath {
+	private final String name;
+
 	private final List<MapNode> nodes;
 
 	public MapPath() {
-		nodes = new LinkedList<>();
+		this("unknown");
+	}
+
+	public MapPath(String name) {
+		this(name, new LinkedList<MapNode>());
+	}
+
+	public MapPath(String name, List<MapNode> nodes) {
+		this.name = name;
+		this.nodes = nodes;
 	}
 
 	public void addNode(MapNode mapNode) {
@@ -16,6 +27,10 @@ public class MapPath {
 
 	public List<MapNode> getNodes() {
 		return nodes;
+	}
+
+	public String getName() {
+		return name;
 	}
 
 	@Override
