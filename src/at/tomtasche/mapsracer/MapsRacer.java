@@ -6,22 +6,24 @@ import java.awt.Graphics2D;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-import org.openstreetmap.osmosis.core.domain.v0_6.Node;
-import org.openstreetmap.osmosis.core.domain.v0_6.Tag;
-import org.openstreetmap.osmosis.core.domain.v0_6.Way;
-import org.openstreetmap.osmosis.core.domain.v0_6.WayNode;
+import at.tomtasche.mapsracer.map.MapConverter;
+import at.tomtasche.mapsracer.map.MapNode;
+import at.tomtasche.mapsracer.map.MapPath;
+import at.tomtasche.mapsracer.map.OsmMap;
 
 public class MapsRacer {
-	private static OsmParser parser;
-	private static MeinStern routing;
+	private static JFrame frame;
 	private static MapPanel mapPanel;
+
+	private static OsmParser parser;
+
+	private static MeinStern routing;
 
 	public static void main(String[] args) throws FileNotFoundException {
 		parser = new OsmParser(new File("test.osm"));
@@ -30,7 +32,7 @@ public class MapsRacer {
 
 		mapPanel = new MapPanel();
 
-		JFrame frame = new JFrame();
+		frame = new JFrame();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setLocationRelativeTo(null);
 		frame.add(mapPanel);
@@ -44,17 +46,26 @@ public class MapsRacer {
 			public void run() {
 				parser.initialize();
 
-				routing.initialize(parser.getNodeLinks());
+				OsmMap map = MapConverter.convert(parser);
 
-				Node start = parser.toNode(parser.getWays().get(1)
-						.getWayNodes().get(1));
-				Node end = parser.toNode(parser.getWays().get(5).getWayNodes()
-						.get(0));
+				routing.initialize(map.getStreetGraph());
+				MapNode start = map.getStreets().get(1).getNodes().get(1);
+				MapNode end = map.getStreets().get(5).getNodes().get(0);
+				List<MapNode> path = routing.search(start, end);
+				mapPanel.setPath(new MapPath("route", path));
 
-				List<Node> path = routing.search(start, end);
+				mapPanel.setStreets(map.getStreets());
 
-				mapPanel.setWays(parser.getWays());
-				mapPanel.setPath(path);
+				// // TODO: broken
+				// Dimension frameSize = frame.getSize();
+				// double yScale = (frameSize.height * 1.0)
+				// / parser.calculateY(parser.getMaxLat());
+				// mapPanel.setyScale(yScale);
+				//
+				// // TODO: remove
+				// mapPanel.setxScale(yScale);
+				// // mapPanel.setxScale((frameSize.width * 0.5)
+				// // / parser.calculateX(parser.getMaxLon()));
 
 				SwingUtilities.invokeLater(new Runnable() {
 
@@ -71,12 +82,17 @@ public class MapsRacer {
 	private static class MapPanel extends JPanel {
 		private static final boolean SHOW_NAMES = false;
 
-		private List<Node> path;
-		private List<Way> ways;
+		private MapPath path;
+		private List<MapPath> streets;
+
+		private double xScale;
+		private double yScale;
 
 		public MapPanel() {
-			ways = Collections.emptyList();
-			path = Collections.emptyList();
+			streets = Collections.emptyList();
+
+			xScale = 1;
+			yScale = 1;
 		}
 
 		@Override
@@ -85,60 +101,71 @@ public class MapsRacer {
 
 			Graphics2D g2d = (Graphics2D) g;
 
-			g2d.setColor(Color.BLACK);
-			for (Way way : ways) {
-				boolean nameDrawn = false;
-				List<Node> pathNodes = new LinkedList<>();
-				for (WayNode wayNode : way.getWayNodes()) {
-					Node node = parser.toNode(wayNode);
-					pathNodes.add(node);
+			g2d.scale(xScale, xScale);
 
+			g2d.setColor(Color.BLACK);
+			for (MapPath street : streets) {
+				drawPath(street, g2d);
+			}
+
+			g2d.setColor(Color.RED);
+
+			if (path != null) {
+				drawPath(path, g2d);
+			}
+		}
+
+		private void drawPath(MapPath path, Graphics2D g2d) {
+			MapNode lastNode = null;
+
+			for (MapNode node : path.getNodes()) {
+				if (lastNode != null) {
+					boolean nameDrawn = false;
 					if (!nameDrawn) {
 						if (SHOW_NAMES) {
-							String name = "unknown name";
-							for (Tag tag : way.getTags()) {
-								if (!tag.getKey().equals("name")) {
-									continue;
-								} else {
-									name = tag.getValue();
-								}
-							}
-
-							g2d.drawString(name, parser.calculateX(node),
-									parser.calculateY(node));
+							g2d.drawString(path.getName(),
+									calculateScaledX(node),
+									calculateScaledY(node));
 						}
 
 						nameDrawn = true;
 					}
-				}
 
-				drawPath(pathNodes, g2d);
-			}
-
-			g2d.setColor(Color.RED);
-			drawPath(path, g2d);
-		}
-
-		private void drawPath(List<Node> pathNodes, Graphics2D g2d) {
-			Node lastNode = null;
-
-			for (Node node : pathNodes) {
-				if (lastNode != null) {
-					g2d.drawLine(parser.calculateX(lastNode),
-							parser.calculateY(lastNode),
-							parser.calculateX(node), parser.calculateY(node));
+					g2d.drawLine(calculateScaledX(lastNode),
+							calculateScaledY(lastNode), calculateScaledX(node),
+							calculateScaledY(node));
 				}
 
 				lastNode = node;
 			}
 		}
 
-		public void setWays(List<Way> ways) {
-			this.ways = ways;
+		private int calculateScaledX(MapNode node) {
+			int rawX = node.getX();
+			double scaledX = rawX * xScale;
+			return (int) scaledX;
 		}
 
-		public void setPath(List<Node> path) {
+		private int calculateScaledY(MapNode node) {
+			int rawY = node.getY();
+			double scaledY = rawY * yScale;
+			return (int) scaledY;
+		}
+
+		public void setStreets(List<MapPath> streets) {
+			this.streets = streets;
+		}
+
+		public void setPath(MapPath path) {
 			this.path = path;
+		}
+
+		public void setxScale(double xScale) {
+			this.xScale = xScale;
+		}
+
+		public void setyScale(double yScale) {
+			this.yScale = yScale;
 		}
 	}
 }

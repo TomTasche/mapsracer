@@ -145,35 +145,31 @@ public class OsmParser {
 		return node;
 	}
 
-	public int calculateX(Node node) {
-		return (int) distFrom(minLat, minLon, minLat, node.getLongitude());
+	public Map<Long, Node> getNodes() {
+		return nodes;
 	}
 
-	public int calculateY(Node node) {
-		return (int) distFrom(minLat, minLon, node.getLatitude(), minLon);
-	}
-
-	private double distFrom(double lat1, double lng1, double lat2, double lng2) {
-		double earthRadius = 3958.75;
-		double dLat = Math.toRadians(lat2 - lat1);
-		double dLng = Math.toRadians(lng2 - lng1);
-		double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
-				+ Math.cos(Math.toRadians(lat1))
-				* Math.cos(Math.toRadians(lat2)) * Math.sin(dLng / 2)
-				* Math.sin(dLng / 2);
-		double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-		double dist = earthRadius * c;
-
-		int meterConversion = 1609;
-
-		return dist * meterConversion;
+	public Map<Node, List<Node>> getNodeLinks() {
+		return nodeLinks;
 	}
 
 	public List<Way> getWays() {
 		return ways;
 	}
 
-	public Map<Node, List<Node>> getNodeLinks() {
-		return nodeLinks;
+	public double getMinLat() {
+		return minLat;
+	}
+
+	public double getMaxLat() {
+		return maxLat;
+	}
+
+	public double getMinLon() {
+		return minLon;
+	}
+
+	public double getMaxLon() {
+		return maxLon;
 	}
 }
