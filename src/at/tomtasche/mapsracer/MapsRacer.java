@@ -18,10 +18,15 @@ import org.openstreetmap.osmosis.core.domain.v0_6.Tag;
 import org.openstreetmap.osmosis.core.domain.v0_6.Way;
 import org.openstreetmap.osmosis.core.domain.v0_6.WayNode;
 
+import at.tomtasche.mapsracer.map.MapConverter;
+
 public class MapsRacer {
-	private static OsmParser parser;
-	private static MeinStern routing;
+	private static JFrame frame;
 	private static MapPanel mapPanel;
+
+	private static OsmParser parser;
+	private static MapConverter converter;
+	private static MeinStern routing;
 
 	public static void main(String[] args) throws FileNotFoundException {
 		parser = new OsmParser(new File("test.osm"));
@@ -30,7 +35,7 @@ public class MapsRacer {
 
 		mapPanel = new MapPanel();
 
-		JFrame frame = new JFrame();
+		frame = new JFrame();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setLocationRelativeTo(null);
 		frame.add(mapPanel);
@@ -56,6 +61,17 @@ public class MapsRacer {
 				mapPanel.setWays(parser.getWays());
 				mapPanel.setPath(path);
 
+				// TODO: broken
+				// Dimension frameSize = frame.getSize();
+				// double yScale = (frameSize.height * 1.0)
+				// / parser.calculateY(parser.getMaxLat());
+				// mapPanel.setyScale(yScale);
+				//
+				// // TODO: remove
+				// mapPanel.setxScale(yScale);
+				// // mapPanel.setxScale((frameSize.width * 0.5)
+				// // / parser.calculateX(parser.getMaxLon()));
+
 				SwingUtilities.invokeLater(new Runnable() {
 
 					@Override
@@ -74,9 +90,15 @@ public class MapsRacer {
 		private List<Node> path;
 		private List<Way> ways;
 
+		private double xScale;
+		private double yScale;
+
 		public MapPanel() {
 			ways = Collections.emptyList();
 			path = Collections.emptyList();
+
+			xScale = 1;
+			yScale = 1;
 		}
 
 		@Override
@@ -84,6 +106,8 @@ public class MapsRacer {
 			super.paint(g);
 
 			Graphics2D g2d = (Graphics2D) g;
+
+			g2d.scale(xScale, xScale);
 
 			g2d.setColor(Color.BLACK);
 			for (Way way : ways) {
@@ -104,8 +128,8 @@ public class MapsRacer {
 								}
 							}
 
-							g2d.drawString(name, parser.calculateX(node),
-									parser.calculateY(node));
+							g2d.drawString(name, calculateScaledX(node),
+									calculateScaledY(node));
 						}
 
 						nameDrawn = true;
@@ -124,13 +148,25 @@ public class MapsRacer {
 
 			for (Node node : pathNodes) {
 				if (lastNode != null) {
-					g2d.drawLine(parser.calculateX(lastNode),
-							parser.calculateY(lastNode),
-							parser.calculateX(node), parser.calculateY(node));
+					g2d.drawLine(calculateScaledX(lastNode),
+							calculateScaledY(lastNode), calculateScaledX(node),
+							calculateScaledY(node));
 				}
 
 				lastNode = node;
 			}
+		}
+
+		private int calculateScaledX(Node node) {
+			int rawX = parser.calculateX(node);
+			// double scaledX = rawX * xScale;
+			return (int) rawX;
+		}
+
+		private int calculateScaledY(Node node) {
+			int rawY = parser.calculateY(node);
+			// double scaledY = rawY * yScale;
+			return (int) rawY;
 		}
 
 		public void setWays(List<Way> ways) {
@@ -139,6 +175,14 @@ public class MapsRacer {
 
 		public void setPath(List<Node> path) {
 			this.path = path;
+		}
+
+		public void setxScale(double xScale) {
+			this.xScale = xScale;
+		}
+
+		public void setyScale(double yScale) {
+			this.yScale = yScale;
 		}
 	}
 }
