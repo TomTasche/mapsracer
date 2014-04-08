@@ -10,14 +10,23 @@ import org.openstreetmap.osmosis.core.domain.v0_6.Tag;
 import org.openstreetmap.osmosis.core.domain.v0_6.Way;
 import org.openstreetmap.osmosis.core.domain.v0_6.WayNode;
 
+import at.tomtasche.mapsracer.Cluster;
 import at.tomtasche.mapsracer.OsmParser;
 
 public final class MapConverter {
+
+	// TODO: random / virtual cluster
+	private static final Cluster cluster;
+
+	static {
+		cluster = new Cluster(1, 1);
+	}
 
 	private MapConverter() {
 	}
 
 	public static OsmMap convert(OsmParser parser) {
+
 		List<MapPath> streets = new LinkedList<>();
 		Map<MapNode, List<MapNode>> streetGraph = new HashMap<>();
 		for (Way way : parser.getWays()) {
@@ -31,7 +40,7 @@ public final class MapConverter {
 			}
 
 			MapNode lastNode = null;
-			MapPath path = new MapPath(name);
+			MapPath path = new MapPath(way.getId(), name);
 			List<WayNode> wayNodes = way.getWayNodes();
 			for (int i = 0; i < wayNodes.size(); i++) {
 				WayNode wayNode = wayNodes.get(i);
@@ -73,7 +82,7 @@ public final class MapConverter {
 		int x = calculateX(parser, node);
 		int y = calculateY(parser, node);
 
-		return new MapNode(x, y);
+		return new MapNode(x, y, cluster);
 	}
 
 	private static int calculateX(OsmParser parser, Node node) {

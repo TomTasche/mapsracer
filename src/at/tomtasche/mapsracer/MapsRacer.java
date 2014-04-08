@@ -1,11 +1,11 @@
 package at.tomtasche.mapsracer;
 
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -23,18 +23,16 @@ import org.jdesktop.swingx.mapviewer.TileFactoryInfo;
 import at.tomtasche.mapsracer.map.MapConverter;
 import at.tomtasche.mapsracer.map.MapNode;
 import at.tomtasche.mapsracer.map.MapPath;
-import at.tomtasche.mapsracer.map.OsmMap;
 
 public class MapsRacer {
 	private static JFrame frame;
 	private static MapPanel mapPanel;
 
-	private static OsmMap map;
 	private static MeinStern routing;
+	private static NodeManager nodeManager;
 
 	public static void main(String[] args) throws FileNotFoundException {
-		// http://www.openstreetmap.org/export
-		final OsmParser parser = new OsmParser(new File("test.osm"));
+		nodeManager = new NodeManager();
 
 		routing = new MeinStern();
 
@@ -66,30 +64,21 @@ public class MapsRacer {
 
 			@Override
 			public void run() {
-				parser.initialize();
+				nodeManager.initialize();
 
-				map = MapConverter.convert(parser);
+				mapPanel.setStreets(nodeManager.getStreets());
 
-				routing.initialize(map.getStreetGraph());
-				MapNode start = map.getStreets().get(1).getNodes().get(1);
-				MapNode end = map.getStreets().get(5).getNodes().get(0);
-				List<MapNode> path = routing.search(start, end);
-				mapPanel.setPath(new MapPath("route", path));
-
-				mapPanel.setStreets(map.getStreets());
+				// routing.initialize(map.getStreetGraph());
+				// MapNode start = map.getStreets().get(1).getNodes().get(1);
+				// MapNode end = map.getStreets().get(5).getNodes().get(0);
+				// List<MapNode> path = routing.search(start, end);
+				// mapPanel.setPath(new MapPath(0, "route", path));
 
 				SwingUtilities.invokeLater(new Runnable() {
 
 					@Override
 					public void run() {
-						// the map will NOT show all streets completely, because
-						// some parts of some streets are actually ouside the
-						// bounding box (OSM returns always the complete street,
-						// not only parts inside the bounding box)
-						mapPanel.setPreferredSize(new Dimension(map.getWidth(),
-								map.getHeight()));
-
-						frame.pack();
+						mapPanel.repaint();
 					}
 				});
 			}
@@ -169,8 +158,8 @@ public class MapsRacer {
 			return (int) scaledY;
 		}
 
-		public void setStreets(List<MapPath> streets) {
-			this.streets = streets;
+		public void setStreets(Collection<MapPath> streets) {
+			this.streets = new ArrayList<>(streets);
 		}
 
 		public void setPath(MapPath path) {
