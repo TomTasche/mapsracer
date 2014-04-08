@@ -26,7 +26,6 @@ public final class MapConverter {
 	}
 
 	public static OsmMap convert(OsmParser parser) {
-
 		List<MapPath> streets = new LinkedList<>();
 		Map<MapNode, List<MapNode>> streetGraph = new HashMap<>();
 		for (Way way : parser.getWays()) {
@@ -79,10 +78,7 @@ public final class MapConverter {
 	}
 
 	private static MapNode toMapNode(OsmParser parser, Node node) {
-		int x = calculateX(parser, node);
-		int y = calculateY(parser, node);
-
-		return new MapNode(x, y, cluster);
+		return new MapNode(node.getLongitude(), node.getLatitude(), cluster);
 	}
 
 	private static int calculateX(OsmParser parser, Node node) {

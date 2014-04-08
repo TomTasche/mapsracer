@@ -4,22 +4,22 @@ import at.tomtasche.mapsracer.Cluster;
 
 public class MapNode {
 
-	private final int x;
-	private final int y;
+	private final double xLon;
+	private final double yLat;
 	private final Cluster cluster;
 
-	public MapNode(int x, int y, Cluster cluster) {
-		this.x = x;
-		this.y = y;
+	public MapNode(double xLon, double yLat, Cluster cluster) {
+		this.xLon = xLon;
+		this.yLat = yLat;
 		this.cluster = cluster;
 	}
 
-	public int getX() {
-		return x;
+	public double getxLon() {
+		return xLon;
 	}
 
-	public int getY() {
-		return y;
+	public double getyLat() {
+		return yLat;
 	}
 
 	public Cluster getCluster() {
@@ -30,9 +30,12 @@ public class MapNode {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + cluster.hashCode();
-		result = prime * result + x;
-		result = prime * result + y;
+		result = prime * result + ((cluster == null) ? 0 : cluster.hashCode());
+		long temp;
+		temp = Double.doubleToLongBits(xLon);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(yLat);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
 		return result;
 	}
 
@@ -45,11 +48,16 @@ public class MapNode {
 		if (getClass() != obj.getClass())
 			return false;
 		MapNode other = (MapNode) obj;
-		if (!cluster.equals(other.cluster))
+		if (cluster == null) {
+			if (other.cluster != null)
+				return false;
+		} else if (!cluster.equals(other.cluster))
 			return false;
-		if (x != other.x)
+		if (Double.doubleToLongBits(xLon) != Double
+				.doubleToLongBits(other.xLon))
 			return false;
-		if (y != other.y)
+		if (Double.doubleToLongBits(yLat) != Double
+				.doubleToLongBits(other.yLat))
 			return false;
 		return true;
 	}
