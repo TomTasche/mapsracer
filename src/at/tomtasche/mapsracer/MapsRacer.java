@@ -1,6 +1,7 @@
 package at.tomtasche.mapsracer;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.io.File;
@@ -10,6 +11,7 @@ import java.util.List;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 
 import at.tomtasche.mapsracer.map.MapConverter;
@@ -21,22 +23,24 @@ public class MapsRacer {
 	private static JFrame frame;
 	private static MapPanel mapPanel;
 
-	private static OsmParser parser;
-
+	private static OsmMap map;
 	private static MeinStern routing;
 
 	public static void main(String[] args) throws FileNotFoundException {
-		parser = new OsmParser(new File("test.osm"));
+		// http://www.openstreetmap.org/export
+		final OsmParser parser = new OsmParser(new File("test.osm"));
 
 		routing = new MeinStern();
 
 		mapPanel = new MapPanel();
 
+		JScrollPane scrollPane = new JScrollPane(mapPanel);
+
 		frame = new JFrame();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setLocationRelativeTo(null);
-		frame.add(mapPanel);
-		frame.setSize(1024, 1024);
+		frame.add(scrollPane);
+		frame.setSize(512, 512);
 		frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		frame.setVisible(true);
 
@@ -46,7 +50,7 @@ public class MapsRacer {
 			public void run() {
 				parser.initialize();
 
-				OsmMap map = MapConverter.convert(parser);
+				map = MapConverter.convert(parser);
 
 				routing.initialize(map.getStreetGraph());
 				MapNode start = map.getStreets().get(1).getNodes().get(1);
@@ -56,22 +60,18 @@ public class MapsRacer {
 
 				mapPanel.setStreets(map.getStreets());
 
-				// // TODO: broken
-				// Dimension frameSize = frame.getSize();
-				// double yScale = (frameSize.height * 1.0)
-				// / parser.calculateY(parser.getMaxLat());
-				// mapPanel.setyScale(yScale);
-				//
-				// // TODO: remove
-				// mapPanel.setxScale(yScale);
-				// // mapPanel.setxScale((frameSize.width * 0.5)
-				// // / parser.calculateX(parser.getMaxLon()));
-
 				SwingUtilities.invokeLater(new Runnable() {
 
 					@Override
 					public void run() {
-						mapPanel.repaint();
+						// the map will NOT show all streets completely, because
+						// some parts of some streets are actually ouside the
+						// bounding box (OSM returns always the complete street,
+						// not only parts inside the bounding box)
+						mapPanel.setPreferredSize(new Dimension(map.getWidth(),
+								map.getHeight()));
+
+						frame.pack();
 					}
 				});
 			}
