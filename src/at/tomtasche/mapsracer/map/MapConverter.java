@@ -1,9 +1,11 @@
 package at.tomtasche.mapsracer.map;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.openstreetmap.osmosis.core.domain.v0_6.Node;
 import org.openstreetmap.osmosis.core.domain.v0_6.Tag;
@@ -19,7 +21,7 @@ public final class MapConverter {
 
 	public static OsmMap convert(OsmParser parser) {
 		List<MapPath> streets = new LinkedList<>();
-		Map<MapNode, List<MapNode>> streetGraph = new HashMap<>();
+		Map<MapNode, Set<MapNode>> neighborMap = new HashMap<>();
 		for (Way way : parser.getWays()) {
 			String name = "unknown";
 			for (Tag tag : way.getTags()) {
@@ -37,10 +39,10 @@ public final class MapConverter {
 				WayNode wayNode = wayNodes.get(i);
 
 				MapNode mapNode = toMapNode(parser, wayNode);
-				List<MapNode> links = streetGraph.get(mapNode);
+				Set<MapNode> links = neighborMap.get(mapNode);
 				if (links == null) {
-					links = new LinkedList<>();
-					streetGraph.put(mapNode, links);
+					links = new HashSet<>();
+					neighborMap.put(mapNode, links);
 				}
 
 				if (lastNode != null) {
@@ -62,7 +64,7 @@ public final class MapConverter {
 		double mapHeight = distFrom(parser.getMinLat(), parser.getMinLon(),
 				parser.getMaxLat(), parser.getMinLon());
 
-		return new OsmMap((int) mapWidth, (int) mapHeight, streets, streetGraph);
+		return new OsmMap((int) mapWidth, (int) mapHeight, streets, neighborMap);
 	}
 
 	private static MapNode toMapNode(OsmParser parser, WayNode wayNode) {
