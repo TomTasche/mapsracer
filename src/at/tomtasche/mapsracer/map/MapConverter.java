@@ -20,25 +20,32 @@ public final class MapConverter {
 	}
 
 	public static OsmMap convert(OsmParser parser) {
+		Map<Long, MapNode> nodeMap = new HashMap<>();
+		
 		List<MapPath> streets = new LinkedList<>();
 		Map<MapNode, Set<MapNode>> neighborMap = new HashMap<>();
+
 		for (Way way : parser.getWays()) {
 			String name = "unknown";
+
 			for (Tag tag : way.getTags()) {
-				if (!tag.getKey().equals("name")) {
-					continue;
-				} else {
+				if (tag.getKey().equals("name")) {
 					name = tag.getValue();
+					break;
 				}
 			}
 
 			MapNode lastNode = null;
 			MapPath path = new MapPath(name);
 			List<WayNode> wayNodes = way.getWayNodes();
-			for (int i = 0; i < wayNodes.size(); i++) {
-				WayNode wayNode = wayNodes.get(i);
 
-				MapNode mapNode = toMapNode(parser, wayNode);
+			for (WayNode wayNode : wayNodes) {
+				MapNode mapNode = nodeMap.get(wayNode.getNodeId());
+				if (mapNode == null) {
+					mapNode = toMapNode(parser, wayNode);
+					nodeMap.put(wayNode.getNodeId(), mapNode);
+				}
+
 				Set<MapNode> links = neighborMap.get(mapNode);
 				if (links == null) {
 					links = new HashSet<>();
@@ -46,10 +53,10 @@ public final class MapConverter {
 				}
 
 				if (lastNode != null) {
-					links.add(mapNode);
-				}
-				if (i + 1 < wayNodes.size()) {
-					links.add(toMapNode(parser, wayNodes.get(i + 1)));
+					// add left
+					links.add(lastNode);
+					// add right
+					neighborMap.get(lastNode).add(mapNode);
 				}
 
 				path.addNode(mapNode);

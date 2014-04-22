@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Collections;
@@ -39,10 +41,8 @@ public class MapsRacer {
 
 		frame = new JFrame();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setLocationRelativeTo(null);
 		frame.add(scrollPane);
 		frame.setSize(512, 512);
-		frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		frame.setVisible(true);
 
 		new Thread() {
@@ -77,13 +77,35 @@ public class MapsRacer {
 					}
 				});
 
-				Car car = new Car();
-				car.setVelocity(40);
-				car.setDirection(Math.PI / 2);
+				final Car car = new Car();
+				car.setVelocity(100);
 				car.setFrom(start);
 				car.setTo(map.getNeighborMap().get(start).iterator().next());
 				car.setDistance(0);
 				mapPanel.addCar(car);
+
+				frame.addKeyListener(new KeyAdapter() {
+					@Override
+					public void keyPressed(KeyEvent e) {
+						switch (e.getKeyCode()) {
+						case KeyEvent.VK_LEFT:
+							car.setDirection(-Math.PI / 2);
+							break;
+						case KeyEvent.VK_RIGHT:
+							car.setDirection(Math.PI / 2);
+							break;
+						}
+					}
+
+					public void keyReleased(KeyEvent e) {
+						switch (e.getKeyCode()) {
+						case KeyEvent.VK_LEFT:
+						case KeyEvent.VK_RIGHT:
+							car.setDirection(0);
+							break;
+						}
+					}
+				});
 			}
 		}.start();
 	}
