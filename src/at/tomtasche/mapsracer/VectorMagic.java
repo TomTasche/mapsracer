@@ -31,7 +31,8 @@ public class VectorMagic {
 	}
 
 	public static Vector2d direction(MapNode a, MapNode b) {
-		return new Vector2d(b.getX() - a.getX(), b.getY() - a.getY());
+		return new Vector2d(b.getxLon() - a.getxLon(), b.getyLat()
+				- a.getyLat());
 	}
 
 	public static MapNode crossing(MapNode from, MapNode to,

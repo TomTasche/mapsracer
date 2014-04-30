@@ -1,21 +1,28 @@
 package at.tomtasche.mapsracer.map;
 
+import at.tomtasche.mapsracer.Cluster;
+
 public class MapNode {
 
-	private final int x;
-	private final int y;
+	private final double xLon;
+	private final double yLat;
+	private final Cluster cluster;
 
-	public MapNode(int x, int y) {
-		this.x = x;
-		this.y = y;
+	public MapNode(double xLon, double yLat, Cluster cluster) {
+		this.xLon = xLon;
+		this.yLat = yLat;
+		this.cluster = cluster;
 	}
 
-	public int getX() {
-		return x;
+	public double getxLon() {
+		return xLon;
 	}
 
-	public int getY() {
-		return y;
+	public double getyLat() {
+		return yLat;
 	}
 
+	public Cluster getCluster() {
+		return cluster;
+	}
 }

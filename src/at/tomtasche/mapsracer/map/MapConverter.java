@@ -12,9 +12,17 @@ import org.openstreetmap.osmosis.core.domain.v0_6.Tag;
 import org.openstreetmap.osmosis.core.domain.v0_6.Way;
 import org.openstreetmap.osmosis.core.domain.v0_6.WayNode;
 
+import at.tomtasche.mapsracer.Cluster;
 import at.tomtasche.mapsracer.OsmParser;
 
 public final class MapConverter {
+
+	// TODO: random / virtual cluster
+	private static final Cluster cluster;
+
+	static {
+		cluster = new Cluster(1, 1);
+	}
 
 	private MapConverter() {
 	}
@@ -36,7 +44,7 @@ public final class MapConverter {
 			}
 
 			MapNode lastNode = null;
-			MapPath path = new MapPath(name);
+			MapPath path = new MapPath(way.getId(), name);
 			List<WayNode> wayNodes = way.getWayNodes();
 
 			for (WayNode wayNode : wayNodes) {
@@ -79,10 +87,7 @@ public final class MapConverter {
 	}
 
 	private static MapNode toMapNode(OsmParser parser, Node node) {
-		int x = calculateX(parser, node);
-		int y = calculateY(parser, node);
-
-		return new MapNode(x, y);
+		return new MapNode(node.getLongitude(), node.getLatitude(), cluster);
 	}
 
 	private static int calculateX(OsmParser parser, Node node) {
