@@ -101,7 +101,7 @@ public class NodeManager {
 		return Collections.unmodifiableCollection(cache.getStreets().values());
 	}
 
-	public Map<MapNode, Set<MapPath>> getGraph() {
+	public Map<MapNode, Set<MapNode>> getGraph() {
 		return Collections.unmodifiableMap(cache.getGraph());
 	}
 

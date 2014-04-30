@@ -15,8 +15,8 @@ public class NodeCache {
 	// only used for quick iteration over all streets
 	private final Map<Long, MapPath> streets;
 
-	// contains all nodes, and all streets that pass a node
-	private final Map<MapNode, Set<MapPath>> graph;
+	// contains all nodes, and all nodes connected to a node
+	private final Map<MapNode, Set<MapNode>> graph;
 
 	// holds ids of currently cached clusters
 	private final Cluster[][] clusters;
@@ -29,21 +29,25 @@ public class NodeCache {
 	}
 
 	protected synchronized void addStreet(MapPath newStreet) {
-		MapPath cachedStreet = streets.get(newStreet.getId());
-		if (cachedStreet != null) {
-			cachedStreet.addNodes(newStreet.getNodes());
-		} else {
-			for (MapNode node : newStreet.getNodes()) {
-				Set<MapPath> paths = graph.get(node);
-				if (paths == null) {
-					paths = new HashSet<>();
-					graph.put(node, paths);
-				}
+		streets.put(newStreet.getId(), newStreet);
 
-				paths.add(newStreet);
+		MapNode lastNode = null;
+		for (MapNode node : newStreet.getNodes()) {
+			Set<MapNode> neighbors = graph.get(node);
+
+			if (neighbors == null) {
+				neighbors = new HashSet<>();
+				graph.put(node, neighbors);
 			}
 
-			streets.put(newStreet.getId(), newStreet);
+			if (lastNode != null) {
+				// add left
+				neighbors.add(lastNode);
+				// add right
+				graph.get(lastNode).add(node);
+			}
+
+			lastNode = node;
 		}
 	}
 
@@ -113,7 +117,7 @@ public class NodeCache {
 		return clusters;
 	}
 
-	protected Map<MapNode, Set<MapPath>> getGraph() {
+	protected Map<MapNode, Set<MapNode>> getGraph() {
 		return graph;
 	}
 

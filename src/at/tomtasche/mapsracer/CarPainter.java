@@ -5,7 +5,6 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.geom.Point2D;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -16,18 +15,17 @@ import org.jdesktop.swingx.mapviewer.GeoPosition;
 import org.jdesktop.swingx.painter.Painter;
 
 import at.tomtasche.mapsracer.map.MapNode;
-import at.tomtasche.mapsracer.map.MapPath;
 
 public class CarPainter implements Painter<JXMapViewer> {
 	private Color color = Color.RED;
 	private boolean antiAlias = true;
 
-	private Map<MapNode, Set<MapPath>> graph;
+	private Map<MapNode, Set<MapNode>> graph;
 
 	private long lastNano = -1;
 	private List<Car> cars = new LinkedList<>();
 
-	public void initialize(Map<MapNode, Set<MapPath>> graph) {
+	public void initialize(Map<MapNode, Set<MapNode>> graph) {
 		this.graph = graph;
 	}
 
@@ -52,9 +50,16 @@ public class CarPainter implements Painter<JXMapViewer> {
 					RenderingHints.VALUE_ANTIALIAS_ON);
 
 		long tmp = System.nanoTime();
-		if (lastNano == -1)
+		if (lastNano == -1) {
 			lastNano = tmp;
+		}
+
 		double time = (tmp - lastNano) * 0.000000001;
+		// refresh every second
+		if (time > 0 && time < 1) {
+			return;
+		}
+
 		lastNano = tmp;
 
 		for (Car car : cars) {
@@ -65,11 +70,6 @@ public class CarPainter implements Painter<JXMapViewer> {
 						car.getTo()).length();
 				if (newDistance >= distance) {
 					MapNode from = car.getTo();
-					
-					Set<MapNode> neighbors = new HashSet<>();
-					
-					Set<MapPath> paths = graph.get(car.getTo());
-					
 					MapNode to = VectorMagic.crossing(car.getFrom(),
 							car.getTo(), graph.get(car.getTo()),
 							car.getDirection());

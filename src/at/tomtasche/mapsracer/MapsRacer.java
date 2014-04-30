@@ -56,7 +56,6 @@ public class MapsRacer {
 		frame.setLocationRelativeTo(null);
 		frame.add(mapViewer);
 		frame.setSize(512, 512);
-		frame.setVisible(true);
 
 		new Thread() {
 
@@ -64,25 +63,21 @@ public class MapsRacer {
 			public void run() {
 				nodeManager.initialize();
 
-				Iterator<MapNode> iterator = nodeManager.getStreets()
-						.iterator().next().getNodes().iterator();
-				MapNode start = iterator.next();
-				MapNode end = iterator.next();
+				MapNode start = nodeManager.getStreets().iterator().next()
+						.getNodes().iterator().next();
+				MapNode end = nodeManager.getGraph().get(start).iterator()
+						.next();
 
 				graphPainter.initialize(nodeManager.getStreets());
 				carPainter.initialize(nodeManager.getGraph());
-
-				// routing.initialize(map.getStreetGraph());
-				// MapNode start = map.getStreets().get(1).getNodes().get(1);
-				// MapNode end = map.getStreets().get(5).getNodes().get(0);
-				// List<MapNode> path = routing.search(start, end);
-				// mapPanel.setPath(new MapPath(0, "route", path));
 
 				SwingUtilities.invokeLater(new Runnable() {
 
 					@Override
 					public void run() {
 						mapViewer.repaint();
+
+						frame.setVisible(true);
 					}
 				});
 
