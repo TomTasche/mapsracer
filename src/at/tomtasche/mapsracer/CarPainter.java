@@ -66,8 +66,11 @@ public class CarPainter implements Painter<JXMapViewer> {
 			double newDistance = car.getDistance() + car.getVelocity() * time;
 
 			while (true) {
-				double distance = VectorMagic.direction(car.getFrom(),
-						car.getTo()).length();
+				Vector2d direction = VectorMagic.direction(car.getFrom(),
+						car.getTo());
+
+				double distance = CoordinateUtil.distance(direction);
+
 				if (newDistance >= distance) {
 					MapNode from = car.getTo();
 					MapNode to = VectorMagic.crossing(car.getFrom(),
@@ -92,8 +95,8 @@ public class CarPainter implements Painter<JXMapViewer> {
 			Vector2d position = a
 					.add(direction.mul(car.getDistance() / length));
 
-			GeoPosition geoPosition = new GeoPosition(position.getX(),
-					position.getY());
+			GeoPosition geoPosition = new GeoPosition(position.getY(),
+					position.getX());
 
 			Point2D pt = map.getTileFactory().geoToPixel(geoPosition,
 					map.getZoom());
