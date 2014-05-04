@@ -2,8 +2,9 @@ package at.tomtasche.mapsracer;
 
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.FileNotFoundException;
-import java.util.Iterator;
 
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
@@ -26,6 +27,8 @@ public class MapsRacer {
 	private static JXMapViewer mapViewer;
 	private static GraphPainter graphPainter;
 	private static CarPainter carPainter;
+
+	private static Thread thread;
 
 	public static void main(String[] args) throws FileNotFoundException {
 		nodeManager = new NodeManager();
@@ -57,7 +60,17 @@ public class MapsRacer {
 		frame.add(mapViewer);
 		frame.setSize(512, 512);
 
-		new Thread() {
+		frame.addWindowListener(new WindowAdapter() {
+
+			@Override
+			public void windowClosed(WindowEvent e) {
+				thread.interrupt();
+
+				super.windowClosed(e);
+			}
+		});
+
+		thread = new Thread() {
 
 			@Override
 			public void run() {
@@ -99,6 +112,9 @@ public class MapsRacer {
 						case KeyEvent.VK_RIGHT:
 							car.setDirection(Math.PI / 2);
 							break;
+						case KeyEvent.VK_ENTER:
+							frame.repaint();
+							break;
 						}
 					}
 
@@ -111,7 +127,20 @@ public class MapsRacer {
 						}
 					}
 				});
+
+				while (true) {
+					try {
+						Thread.sleep(250);
+					} catch (InterruptedException e1) {
+						e1.printStackTrace();
+
+						return;
+					}
+
+					frame.repaint();
+				}
 			}
-		}.start();
+		};
+		thread.start();
 	}
 }

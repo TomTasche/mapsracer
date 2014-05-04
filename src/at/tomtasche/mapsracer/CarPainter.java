@@ -17,7 +17,9 @@ import org.jdesktop.swingx.painter.Painter;
 import at.tomtasche.mapsracer.map.MapNode;
 
 public class CarPainter implements Painter<JXMapViewer> {
-	private Color color = Color.RED;
+
+	private static final boolean DEBUG = true;
+
 	private boolean antiAlias = true;
 
 	private Map<MapNode, Set<MapNode>> graph;
@@ -55,10 +57,6 @@ public class CarPainter implements Painter<JXMapViewer> {
 		}
 
 		double time = (tmp - lastNano) * 0.000000001;
-		// refresh every second
-		if (time > 0 && time < 1) {
-			return;
-		}
 
 		lastNano = tmp;
 
@@ -102,6 +100,28 @@ public class CarPainter implements Painter<JXMapViewer> {
 					map.getZoom());
 
 			g.fillOval((int) (pt.getX() - 10), (int) (pt.getY() - 10), 20, 20);
+
+			if (DEBUG) {
+				geoPosition = new GeoPosition(car.getFrom().getyLat(), car
+						.getFrom().getxLon());
+
+				pt = map.getTileFactory()
+						.geoToPixel(geoPosition, map.getZoom());
+
+				g.setColor(Color.GREEN);
+				g.fillOval((int) (pt.getX() - 10), (int) (pt.getY() - 10), 20,
+						20);
+
+				geoPosition = new GeoPosition(car.getTo().getyLat(), car
+						.getTo().getxLon());
+
+				pt = map.getTileFactory()
+						.geoToPixel(geoPosition, map.getZoom());
+
+				g.setColor(Color.BLUE);
+				g.fillOval((int) (pt.getX() - 10), (int) (pt.getY() - 10), 20,
+						20);
+			}
 		}
 
 		g.dispose();
