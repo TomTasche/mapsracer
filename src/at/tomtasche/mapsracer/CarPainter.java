@@ -5,10 +5,15 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.geom.Point2D;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.imageio.ImageIO;
 
 import org.jdesktop.swingx.JXMapViewer;
 import org.jdesktop.swingx.mapviewer.GeoPosition;
@@ -27,8 +32,16 @@ public class CarPainter implements Painter<JXMapViewer> {
 	private long lastNano = -1;
 	private List<Car> cars = new LinkedList<>();
 
+	private BufferedImage carIcon;
+
 	public void initialize(Map<MapNode, Set<MapNode>> graph) {
 		this.graph = graph;
+
+		try {
+			carIcon = ImageIO.read(new File("car.png"));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void addCar(Car car) {
@@ -99,7 +112,13 @@ public class CarPainter implements Painter<JXMapViewer> {
 			Point2D pt = map.getTileFactory().geoToPixel(geoPosition,
 					map.getZoom());
 
-			g.fillOval((int) (pt.getX() - 10), (int) (pt.getY() - 10), 20, 20);
+			if (carIcon != null) {
+				g.drawImage(carIcon, (int) (pt.getX() - 20),
+						(int) (pt.getY() - 20), null);
+			} else {
+				g.fillOval((int) (pt.getX() - 10), (int) (pt.getY() - 10), 20,
+						20);
+			}
 
 			if (DEBUG) {
 				geoPosition = new GeoPosition(car.getFrom().getyLat(), car
