@@ -1,8 +1,10 @@
 package at.tomtasche.mapsracer;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import at.tomtasche.mapsracer.map.MapNode;
 
@@ -18,22 +20,22 @@ public class MeinStern {
 	/*
 	 * maps the names of a Thing to its connected Things.
 	 */
-	private Map<MapNode, List<MapNode>> graph;
+	private Map<MapNode, Set<MapNode>> graph;
 	/*
 	 * prevents endless-loops by remembering all previously visited / inspected
 	 * / "closed" Things. we won't inspect closed Things a second time.
 	 */
-	private List<MapNode> closedThings;
+	private Set<MapNode> closedThings;
 	/*
 	 * holds the shortest path currently known to the algorithm. whenever we
 	 * find a shorter one we replace this with the shorter one.
 	 */
 	private List<MapNode> currentShortestKnownPath;
 
-	public void initialize(Map<MapNode, List<MapNode>> graph) {
+	public void initialize(Map<MapNode, Set<MapNode>> graph) {
 		this.graph = graph;
 
-		closedThings = new LinkedList<>();
+		closedThings = new HashSet<>();
 		currentShortestKnownPath = new LinkedList<>();
 	}
 
@@ -59,7 +61,7 @@ public class MeinStern {
 		// to inspect it another time later on
 		closedThings.add(fromThing);
 
-		List<MapNode> things = graph.get(fromThing);
+		Set<MapNode> things = graph.get(fromThing);
 		for (MapNode thing : things) {
 			if (toThing.equals(thing)) {
 				currentPath.add(thing);

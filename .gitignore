@@ -5,3 +5,8 @@
 *.ear
 
 .settings/
+/bin
+
+# Intellij
+/.idea
+*.iml

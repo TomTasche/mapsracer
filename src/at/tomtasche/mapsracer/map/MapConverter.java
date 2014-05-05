@@ -1,53 +1,70 @@
 package at.tomtasche.mapsracer.map;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.openstreetmap.osmosis.core.domain.v0_6.Node;
 import org.openstreetmap.osmosis.core.domain.v0_6.Tag;
 import org.openstreetmap.osmosis.core.domain.v0_6.Way;
 import org.openstreetmap.osmosis.core.domain.v0_6.WayNode;
 
+import at.tomtasche.mapsracer.Cluster;
 import at.tomtasche.mapsracer.OsmParser;
 
 public final class MapConverter {
+
+	// TODO: random / virtual cluster
+	private static final Cluster cluster;
+
+	static {
+		cluster = new Cluster(1, 1);
+	}
 
 	private MapConverter() {
 	}
 
 	public static OsmMap convert(OsmParser parser) {
+		Map<Long, MapNode> nodeMap = new HashMap<>();
+		
 		List<MapPath> streets = new LinkedList<>();
-		Map<MapNode, List<MapNode>> streetGraph = new HashMap<>();
+		Map<MapNode, Set<MapNode>> neighborMap = new HashMap<>();
+
 		for (Way way : parser.getWays()) {
 			String name = "unknown";
+
 			for (Tag tag : way.getTags()) {
-				if (!tag.getKey().equals("name")) {
-					continue;
-				} else {
+				if (tag.getKey().equals("name")) {
 					name = tag.getValue();
+					break;
 				}
 			}
 
 			MapNode lastNode = null;
-			MapPath path = new MapPath(name);
+			MapPath path = new MapPath(way.getId(), name);
 			List<WayNode> wayNodes = way.getWayNodes();
-			for (int i = 0; i < wayNodes.size(); i++) {
-				WayNode wayNode = wayNodes.get(i);
 
-				MapNode mapNode = toMapNode(parser, wayNode);
-				List<MapNode> links = streetGraph.get(mapNode);
+			for (WayNode wayNode : wayNodes) {
+				MapNode mapNode = nodeMap.get(wayNode.getNodeId());
+				if (mapNode == null) {
+					mapNode = toMapNode(parser, wayNode);
+					nodeMap.put(wayNode.getNodeId(), mapNode);
+				}
+
+				Set<MapNode> links = neighborMap.get(mapNode);
 				if (links == null) {
-					links = new LinkedList<>();
-					streetGraph.put(mapNode, links);
+					links = new HashSet<>();
+					neighborMap.put(mapNode, links);
 				}
 
 				if (lastNode != null) {
-					links.add(mapNode);
-				}
-				if (i + 1 < wayNodes.size()) {
-					links.add(toMapNode(parser, wayNodes.get(i + 1)));
+					// add left
+					links.add(lastNode);
+					// add right
+					neighborMap.get(lastNode).add(mapNode);
 				}
 
 				path.addNode(mapNode);
@@ -62,7 +79,7 @@ public final class MapConverter {
 		double mapHeight = distFrom(parser.getMinLat(), parser.getMinLon(),
 				parser.getMaxLat(), parser.getMinLon());
 
-		return new OsmMap((int) mapWidth, (int) mapHeight, streets, streetGraph);
+		return new OsmMap((int) mapWidth, (int) mapHeight, streets, neighborMap);
 	}
 
 	private static MapNode toMapNode(OsmParser parser, WayNode wayNode) {
@@ -70,10 +87,7 @@ public final class MapConverter {
 	}
 
 	private static MapNode toMapNode(OsmParser parser, Node node) {
-		int x = calculateX(parser, node);
-		int y = calculateY(parser, node);
-
-		return new MapNode(x, y);
+		return new MapNode(node.getLongitude(), node.getLatitude(), cluster);
 	}
 
 	private static int calculateX(OsmParser parser, Node node) {

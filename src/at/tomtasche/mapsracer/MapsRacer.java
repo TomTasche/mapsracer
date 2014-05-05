@@ -1,171 +1,153 @@
 package at.tomtasche.mapsracer;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.io.File;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.FileNotFoundException;
-import java.util.Collections;
-import java.util.List;
 
 import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 
-import at.tomtasche.mapsracer.map.MapConverter;
+import org.jdesktop.swingx.JXMapViewer;
+import org.jdesktop.swingx.OSMTileFactoryInfo;
+import org.jdesktop.swingx.mapviewer.DefaultTileFactory;
+import org.jdesktop.swingx.mapviewer.GeoPosition;
+import org.jdesktop.swingx.mapviewer.TileFactoryInfo;
+import org.jdesktop.swingx.painter.CompoundPainter;
+
 import at.tomtasche.mapsracer.map.MapNode;
-import at.tomtasche.mapsracer.map.MapPath;
-import at.tomtasche.mapsracer.map.OsmMap;
 
 public class MapsRacer {
-	private static JFrame frame;
-	private static MapPanel mapPanel;
 
-	private static OsmMap map;
+	private static final boolean DEBUG_DRAW_GRAPH = false;
+
+	private static JFrame frame;
+
 	private static MeinStern routing;
+	private static NodeManager nodeManager;
+
+	private static JXMapViewer mapViewer;
+	private static GraphPainter graphPainter;
+	private static CarPainter carPainter;
+
+	private static Thread thread;
 
 	public static void main(String[] args) throws FileNotFoundException {
-		// http://www.openstreetmap.org/export
-		final OsmParser parser = new OsmParser(new File("test.osm"));
+		nodeManager = new NodeManager();
 
 		routing = new MeinStern();
 
-		mapPanel = new MapPanel();
+		mapViewer = new JXMapViewer();
 
-		JScrollPane scrollPane = new JScrollPane(mapPanel);
+		TileFactoryInfo info = new OSMTileFactoryInfo();
+		DefaultTileFactory tileFactory = new DefaultTileFactory(info);
+		tileFactory.setThreadPoolSize(8);
+
+		mapViewer.setTileFactory(tileFactory);
+
+		mapViewer.setZoom(3);
+		// TODO: fetch .osm-file according to this GeoPosition
+		mapViewer.setAddressLocation(new GeoPosition(48.1465, 16.3291));
+
+		carPainter = new CarPainter();
+		graphPainter = new GraphPainter();
+
+		CompoundPainter<JXMapViewer> painter = new CompoundPainter<JXMapViewer>();
+		painter.addPainter(carPainter);
+		if (DEBUG_DRAW_GRAPH) {
+			painter.addPainter(graphPainter);
+		}
+
+		mapViewer.setOverlayPainter(painter);
 
 		frame = new JFrame();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setLocationRelativeTo(null);
-		frame.add(scrollPane);
+		frame.add(mapViewer);
 		frame.setSize(512, 512);
-		frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-		frame.setVisible(true);
 
-		new Thread() {
+		frame.addWindowListener(new WindowAdapter() {
+
+			@Override
+			public void windowClosed(WindowEvent e) {
+				thread.interrupt();
+
+				super.windowClosed(e);
+			}
+		});
+
+		thread = new Thread() {
 
 			@Override
 			public void run() {
-				parser.initialize();
+				nodeManager.initialize();
 
-				map = MapConverter.convert(parser);
+				MapNode start = nodeManager.getStreets().iterator().next()
+						.getNodes().iterator().next();
+				MapNode end = nodeManager.getGraph().get(start).iterator()
+						.next();
 
-				routing.initialize(map.getStreetGraph());
-				MapNode start = map.getStreets().get(1).getNodes().get(1);
-				MapNode end = map.getStreets().get(5).getNodes().get(0);
-				List<MapNode> path = routing.search(start, end);
-				mapPanel.setPath(new MapPath("route", path));
-
-				mapPanel.setStreets(map.getStreets());
+				graphPainter.initialize(nodeManager.getStreets());
+				carPainter.initialize(nodeManager.getGraph());
 
 				SwingUtilities.invokeLater(new Runnable() {
 
 					@Override
 					public void run() {
-						// the map will NOT show all streets completely, because
-						// some parts of some streets are actually ouside the
-						// bounding box (OSM returns always the complete street,
-						// not only parts inside the bounding box)
-						mapPanel.setPreferredSize(new Dimension(map.getWidth(),
-								map.getHeight()));
+						mapViewer.repaint();
 
-						frame.pack();
+						frame.setVisible(true);
 					}
 				});
-			}
-		}.start();
-	}
 
-	@SuppressWarnings("serial")
-	private static class MapPanel extends JPanel {
-		private static final boolean SHOW_NAMES = false;
+				final Car car = new Car();
+				car.setVelocity(100);
+				car.setFrom(start);
+				car.setTo(end);
+				car.setDistance(0);
 
-		private MapPath path;
-		private List<MapPath> streets;
+				carPainter.addCar(car);
 
-		private double xScale;
-		private double yScale;
-
-		public MapPanel() {
-			streets = Collections.emptyList();
-
-			xScale = 1;
-			yScale = 1;
-		}
-
-		@Override
-		public void paint(Graphics g) {
-			super.paint(g);
-
-			Graphics2D g2d = (Graphics2D) g;
-
-			g2d.scale(xScale, xScale);
-
-			g2d.setColor(Color.BLACK);
-			for (MapPath street : streets) {
-				drawPath(street, g2d);
-			}
-
-			g2d.setColor(Color.RED);
-
-			if (path != null) {
-				drawPath(path, g2d);
-			}
-		}
-
-		private void drawPath(MapPath path, Graphics2D g2d) {
-			MapNode lastNode = null;
-
-			for (MapNode node : path.getNodes()) {
-				if (lastNode != null) {
-					boolean nameDrawn = false;
-					if (!nameDrawn) {
-						if (SHOW_NAMES) {
-							g2d.drawString(path.getName(),
-									calculateScaledX(node),
-									calculateScaledY(node));
+				frame.addKeyListener(new KeyAdapter() {
+					@Override
+					public void keyPressed(KeyEvent e) {
+						switch (e.getKeyCode()) {
+						case KeyEvent.VK_LEFT:
+							car.setDirection(-Math.PI / 2);
+							break;
+						case KeyEvent.VK_RIGHT:
+							car.setDirection(Math.PI / 2);
+							break;
+						case KeyEvent.VK_ENTER:
+							frame.repaint();
+							break;
 						}
-
-						nameDrawn = true;
 					}
 
-					g2d.drawLine(calculateScaledX(lastNode),
-							calculateScaledY(lastNode), calculateScaledX(node),
-							calculateScaledY(node));
+					public void keyReleased(KeyEvent e) {
+						switch (e.getKeyCode()) {
+						case KeyEvent.VK_LEFT:
+						case KeyEvent.VK_RIGHT:
+							car.setDirection(0);
+							break;
+						}
+					}
+				});
+
+				while (true) {
+					try {
+						Thread.sleep(50);
+					} catch (InterruptedException e1) {
+						e1.printStackTrace();
+
+						return;
+					}
+
+					frame.repaint();
 				}
-
-				lastNode = node;
 			}
-		}
-
-		private int calculateScaledX(MapNode node) {
-			int rawX = node.getX();
-			double scaledX = rawX * xScale;
-			return (int) scaledX;
-		}
-
-		private int calculateScaledY(MapNode node) {
-			int rawY = node.getY();
-			double scaledY = rawY * yScale;
-			return (int) scaledY;
-		}
-
-		public void setStreets(List<MapPath> streets) {
-			this.streets = streets;
-		}
-
-		public void setPath(MapPath path) {
-			this.path = path;
-		}
-
-		public void setxScale(double xScale) {
-			this.xScale = xScale;
-		}
-
-		public void setyScale(double yScale) {
-			this.yScale = yScale;
-		}
+		};
+		thread.start();
 	}
 }
