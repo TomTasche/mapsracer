@@ -19,6 +19,9 @@ import org.jdesktop.swingx.painter.CompoundPainter;
 import at.tomtasche.mapsracer.map.MapNode;
 
 public class MapsRacer {
+
+	private static final boolean DEBUG_DRAW_GRAPH = false;
+
 	private static JFrame frame;
 
 	private static MeinStern routing;
@@ -47,11 +50,15 @@ public class MapsRacer {
 		// TODO: fetch .osm-file according to this GeoPosition
 		mapViewer.setAddressLocation(new GeoPosition(48.1465, 16.3291));
 
-		graphPainter = new GraphPainter();
 		carPainter = new CarPainter();
+		graphPainter = new GraphPainter();
 
-		CompoundPainter<JXMapViewer> painter = new CompoundPainter<JXMapViewer>(
-				graphPainter, carPainter);
+		CompoundPainter<JXMapViewer> painter = new CompoundPainter<JXMapViewer>();
+		painter.addPainter(carPainter);
+		if (DEBUG_DRAW_GRAPH) {
+			painter.addPainter(graphPainter);
+		}
+
 		mapViewer.setOverlayPainter(painter);
 
 		frame = new JFrame();
@@ -130,7 +137,7 @@ public class MapsRacer {
 
 				while (true) {
 					try {
-						Thread.sleep(250);
+						Thread.sleep(50);
 					} catch (InterruptedException e1) {
 						e1.printStackTrace();
 

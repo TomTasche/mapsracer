@@ -18,7 +18,7 @@ import at.tomtasche.mapsracer.map.MapNode;
 
 public class CarPainter implements Painter<JXMapViewer> {
 
-	private static final boolean DEBUG = true;
+	private static final boolean DEBUG = false;
 
 	private boolean antiAlias = true;
 
