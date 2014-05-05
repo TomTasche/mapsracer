@@ -6,3 +6,7 @@
 
 .settings/
 /bin
+
+# Intellij
+/.idea
+*.iml
