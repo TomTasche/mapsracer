@@ -89,7 +89,7 @@ public class CarPainter implements Painter<JXMapViewer> {
 			Vector2d b = new Vector2d(car.getTo().getxLon(), car.getTo()
 					.getyLat());
 			Vector2d direction = b.sub(a);
-			double length = direction.length();
+			double length = CoordinateUtil.distance(direction);
 			Vector2d position = a
 					.add(direction.mul(car.getDistance() / length));
 
