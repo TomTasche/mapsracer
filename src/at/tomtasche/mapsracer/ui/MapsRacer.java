@@ -82,11 +82,16 @@ public class MapsRacer {
 			}
 		});
 
+		// always display window before initializing NodeManager, because
+		// otherwise JXMapViewer.getViewportBounds() is empty and we are not
+		// able to calculate cluster-sizes
+		frame.setVisible(true);
+
 		thread = new Thread() {
 
 			@Override
 			public void run() {
-				nodeManager.initialize();
+				nodeManager.initialize(mapViewer);
 
 				MapNode start = nodeManager.getStreets().iterator().next()
 						.getNodes().iterator().next();
@@ -95,16 +100,6 @@ public class MapsRacer {
 
 				graphPainter.initialize(nodeManager.getStreets());
 				carPainter.initialize(nodeManager.getGraph());
-
-				SwingUtilities.invokeLater(new Runnable() {
-
-					@Override
-					public void run() {
-						mapViewer.repaint();
-
-						frame.setVisible(true);
-					}
-				});
 
 				final Car car = new Car();
 				car.setVelocity(100);

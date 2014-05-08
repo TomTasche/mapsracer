@@ -1,5 +1,7 @@
 package at.tomtasche.mapsracer.data;
 
+import java.awt.Rectangle;
+import java.awt.geom.Point2D;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
@@ -8,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.jdesktop.swingx.JXMapViewer;
 import org.jdesktop.swingx.mapviewer.GeoPosition;
 
 import at.tomtasche.mapsracer.map.BoundingBox;
@@ -25,6 +28,8 @@ public class NodeManager {
 
 	private boolean initialized;
 
+	private JXMapViewer mapViewer;
+
 	public NodeManager(File cacheDirectory, GeoPosition originPosition)
 			throws IOException {
 		this.originPosition = originPosition;
@@ -33,7 +38,14 @@ public class NodeManager {
 		this.cache = new NodeCache();
 	}
 
-	public void initialize() {
+	/**
+	 * @param mapViewer
+	 *            has to be fully initialized at the time of calling this
+	 *            method. Especially getViewportBounds has to return sane data
+	 */
+	public void initialize(JXMapViewer mapViewer) {
+		this.mapViewer = mapViewer;
+
 		fetchCluster(Direction.MIDDLE);
 
 		// TODO:
@@ -62,9 +74,23 @@ public class NodeManager {
 		}
 	}
 
-	private BoundingBox calculateBoundingBox(GeoPosition middle) {
-		// TODO:
-		return new BoundingBox(16.31919, 48.15234, 16.33346, 48.14856);
+	private BoundingBox calculateBoundingBox(Point2D middle) {
+		// TODO: only works for middle-cluster right now
+
+		Rectangle viewportBounds = mapViewer.getViewportBounds();
+
+		Point2D upperLeftPoint = new Point2D.Double(viewportBounds.getMinX(),
+				viewportBounds.getMinY());
+		GeoPosition topLeftPosition = pixelToGeo(upperLeftPoint);
+
+		Point2D bottomRightPoint = new Point2D.Double(viewportBounds.getMaxX(),
+				viewportBounds.getMaxY());
+		GeoPosition bottomRightPosition = pixelToGeo(bottomRightPoint);
+
+		return new BoundingBox(topLeftPosition.getLongitude(),
+				topLeftPosition.getLatitude(),
+				bottomRightPosition.getLongitude(),
+				bottomRightPosition.getLatitude());
 	}
 
 	private void fetchCluster(Direction direction) {
@@ -78,8 +104,15 @@ public class NodeManager {
 			initialized = true;
 
 			try {
+				Point2D centerPoint = geoToPixel(originPosition);
+
+				BoundingBox centerBoundingBox = calculateBoundingBox(centerPoint);
+
+				Cluster centerCluster = new Cluster(0, 0, centerBoundingBox);
+				setCluster(Direction.MIDDLE, centerCluster);
+
 				List<MapPath> streets = fetcher
-						.getBoundingBox(calculateBoundingBox(originPosition));
+						.getBoundingBox(centerBoundingBox);
 				for (MapPath street : streets) {
 					cache.addStreet(street);
 				}
@@ -100,6 +133,16 @@ public class NodeManager {
 
 			return;
 		}
+	}
+
+	private Point2D geoToPixel(GeoPosition position) {
+		return mapViewer.getTileFactory().geoToPixel(position,
+				mapViewer.getZoom());
+	}
+
+	private GeoPosition pixelToGeo(Point2D point) {
+		return mapViewer.getTileFactory()
+				.pixelToGeo(point, mapViewer.getZoom());
 	}
 
 	private Cluster getCluster(Direction direction) {

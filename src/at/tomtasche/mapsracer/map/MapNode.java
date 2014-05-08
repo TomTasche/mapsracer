@@ -4,8 +4,10 @@ import at.tomtasche.mapsracer.data.Cluster;
 
 public class MapNode {
 
+	// coordinates
 	private final double xLon;
 	private final double yLat;
+
 	private final Cluster cluster;
 
 	public MapNode(double xLon, double yLat, Cluster cluster) {

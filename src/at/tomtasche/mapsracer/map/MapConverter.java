@@ -21,7 +21,8 @@ public final class MapConverter {
 	/**
 	 * origin-cluster
 	 */
-	private static final Cluster cluster = new Cluster(0, 0);
+	// TODO: fix boundingbox
+	private static final Cluster cluster = new Cluster(0, 0, null);
 
 	private MapConverter() {
 	}

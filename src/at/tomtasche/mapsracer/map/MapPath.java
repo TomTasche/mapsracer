@@ -10,6 +10,7 @@ import java.util.Set;
 import at.tomtasche.mapsracer.data.Cluster;
 
 public class MapPath {
+
 	private final long id;
 	private final String name;
 

@@ -2,6 +2,7 @@ package at.tomtasche.mapsracer.map;
 
 public class BoundingBox {
 
+	// coordinates
 	private final double left;
 	private final double top;
 	private final double right;
