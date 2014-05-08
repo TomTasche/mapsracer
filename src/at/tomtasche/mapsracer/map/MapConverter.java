@@ -12,8 +12,9 @@ import org.openstreetmap.osmosis.core.domain.v0_6.Tag;
 import org.openstreetmap.osmosis.core.domain.v0_6.Way;
 import org.openstreetmap.osmosis.core.domain.v0_6.WayNode;
 
-import at.tomtasche.mapsracer.Cluster;
-import at.tomtasche.mapsracer.OsmParser;
+import at.tomtasche.mapsracer.data.Cluster;
+import at.tomtasche.mapsracer.osm.OsmMap;
+import at.tomtasche.mapsracer.osm.OsmParser;
 
 public final class MapConverter {
 

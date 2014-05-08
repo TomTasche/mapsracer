@@ -1,4 +1,4 @@
-package at.tomtasche.mapsracer;
+package at.tomtasche.mapsracer.osm;
 
 import java.io.File;
 import java.util.HashMap;

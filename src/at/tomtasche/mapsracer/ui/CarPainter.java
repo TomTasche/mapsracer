@@ -1,4 +1,4 @@
-package at.tomtasche.mapsracer;
+package at.tomtasche.mapsracer.ui;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -19,7 +19,11 @@ import org.jdesktop.swingx.JXMapViewer;
 import org.jdesktop.swingx.mapviewer.GeoPosition;
 import org.jdesktop.swingx.painter.Painter;
 
+import at.tomtasche.mapsracer.map.Car;
 import at.tomtasche.mapsracer.map.MapNode;
+import at.tomtasche.mapsracer.math.CoordinateUtil;
+import at.tomtasche.mapsracer.math.Vector2d;
+import at.tomtasche.mapsracer.math.VectorMagic;
 
 public class CarPainter implements Painter<JXMapViewer> {
 

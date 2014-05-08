@@ -1,4 +1,4 @@
-package at.tomtasche.mapsracer;
+package at.tomtasche.mapsracer.ui;
 
 import java.awt.BasicStroke;
 import java.awt.Color;

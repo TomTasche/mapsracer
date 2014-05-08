@@ -1,4 +1,4 @@
-package at.tomtasche.mapsracer;
+package at.tomtasche.mapsracer.routing;
 
 import java.util.HashSet;
 import java.util.LinkedList;

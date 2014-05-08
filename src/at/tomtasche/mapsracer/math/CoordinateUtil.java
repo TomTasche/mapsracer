@@ -1,4 +1,5 @@
-package at.tomtasche.mapsracer;
+package at.tomtasche.mapsracer.math;
+
 
 public class CoordinateUtil {
 

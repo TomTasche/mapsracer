@@ -1,4 +1,4 @@
-package at.tomtasche.mapsracer;
+package at.tomtasche.mapsracer.data;
 
 import java.util.HashMap;
 import java.util.HashSet;

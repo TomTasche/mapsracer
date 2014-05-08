@@ -1,4 +1,4 @@
-package at.tomtasche.mapsracer;
+package at.tomtasche.mapsracer.data;
 
 import java.io.File;
 import java.util.Collection;
@@ -9,7 +9,8 @@ import java.util.Set;
 import at.tomtasche.mapsracer.map.MapConverter;
 import at.tomtasche.mapsracer.map.MapNode;
 import at.tomtasche.mapsracer.map.MapPath;
-import at.tomtasche.mapsracer.map.OsmMap;
+import at.tomtasche.mapsracer.osm.OsmMap;
+import at.tomtasche.mapsracer.osm.OsmParser;
 
 public class NodeManager {
 
