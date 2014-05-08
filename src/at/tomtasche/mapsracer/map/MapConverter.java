@@ -18,19 +18,17 @@ import at.tomtasche.mapsracer.osm.OsmParser;
 
 public final class MapConverter {
 
-	// TODO: random / virtual cluster
-	private static final Cluster cluster;
-
-	static {
-		cluster = new Cluster(1, 1);
-	}
+	/**
+	 * origin-cluster
+	 */
+	private static final Cluster cluster = new Cluster(0, 0);
 
 	private MapConverter() {
 	}
 
 	public static OsmMap convert(OsmParser parser) {
 		Map<Long, MapNode> nodeMap = new HashMap<>();
-		
+
 		List<MapPath> streets = new LinkedList<>();
 		Map<MapNode, Set<MapNode>> neighborMap = new HashMap<>();
 

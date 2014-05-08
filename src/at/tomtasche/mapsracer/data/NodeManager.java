@@ -8,20 +8,27 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import at.tomtasche.mapsracer.map.MapConverter;
+import org.jdesktop.swingx.mapviewer.GeoPosition;
+
+import at.tomtasche.mapsracer.map.BoundingBox;
 import at.tomtasche.mapsracer.map.MapNode;
 import at.tomtasche.mapsracer.map.MapPath;
-import at.tomtasche.mapsracer.osm.OsmMap;
-import at.tomtasche.mapsracer.osm.OsmParser;
 
 public class NodeManager {
 
 	private static final boolean AGGRESSIVE_CLEANUP = false;
 
+	private final GeoPosition originPosition;
+
 	private NodeFetcher fetcher;
 	private NodeCache cache;
 
-	public NodeManager(File cacheDirectory) throws IOException {
+	private boolean initialized;
+
+	public NodeManager(File cacheDirectory, GeoPosition originPosition)
+			throws IOException {
+		this.originPosition = originPosition;
+
 		this.fetcher = new NodeFetcher(cacheDirectory);
 		this.cache = new NodeCache();
 	}
@@ -55,9 +62,31 @@ public class NodeManager {
 		}
 	}
 
+	private BoundingBox calculateBoundingBox(GeoPosition middle) {
+		return new BoundingBox(16.31919, 48.15234, 16.33346, 48.14856);
+	}
+
 	private void fetchCluster(Direction direction) {
 		switch (direction) {
 		case MIDDLE:
+			// only called once at initialization!
+			if (initialized) {
+				throw new RuntimeException(
+						"fetchCluster for Direction.MIDDLE called twice. this should never happen!");
+			}
+			initialized = true;
+
+			try {
+				List<MapPath> streets = fetcher
+						.getBoundingBox(calculateBoundingBox(originPosition));
+				for (MapPath street : streets) {
+					cache.addStreet(street);
+				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
 			break;
 		case BOTTOM:
 		case LEFT:
@@ -69,16 +98,6 @@ public class NodeManager {
 			Cluster middleCluster = getCluster(Direction.MIDDLE);
 
 			return;
-		}
-
-		try {
-			List<MapPath> streets = fetcher.getBoundingBox(16.31919, 48.15234, 16.33346, 48.14856);
-			for (MapPath street : streets) {
-				cache.addStreet(street);
-			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 	}
 

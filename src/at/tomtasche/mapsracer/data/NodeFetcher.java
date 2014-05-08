@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 
+import at.tomtasche.mapsracer.map.BoundingBox;
 import at.tomtasche.mapsracer.map.MapConverter;
 import at.tomtasche.mapsracer.map.MapPath;
 import at.tomtasche.mapsracer.osm.OsmMap;
@@ -41,23 +42,21 @@ public class NodeFetcher {
 	 * @return
 	 * @throws IOException
 	 */
-	private URL buildUrl(double left, double top, double right, double bottom)
-			throws IOException {
+	private URL buildUrl(BoundingBox boundingBox) throws IOException {
 		String url = API_BASE_URL;
 		url += "/api/xapi_meta?*[bbox=";
-		url += left + ",";
-		url += bottom + ",";
-		url += right + ",";
-		url += top;
+		url += boundingBox.getLeft() + ",";
+		url += boundingBox.getBottom() + ",";
+		url += boundingBox.getRight() + ",";
+		url += boundingBox.getTop();
 		url += "]";
 
 		return new URL(url);
 	}
 
-	private File fetchBoundingBox(double left, double top, double right,
-			double bottom) throws IOException {
-		HttpURLConnection connection = (HttpURLConnection) buildUrl(left, top,
-				right, bottom).openConnection();
+	private File fetchBoundingBox(BoundingBox boundingBox) throws IOException {
+		HttpURLConnection connection = (HttpURLConnection) buildUrl(boundingBox)
+				.openConnection();
 
 		try {
 			File cacheFile = new File(cacheDirectory, "mapsracer-"
@@ -82,9 +81,9 @@ public class NodeFetcher {
 		return MapConverter.convert(parser);
 	}
 
-	protected List<MapPath> getBoundingBox(double left, double top,
-			double right, double bottom) throws IOException {
-		File cacheFile = fetchBoundingBox(left, top, right, bottom);
+	protected List<MapPath> getBoundingBox(BoundingBox boundingBox)
+			throws IOException {
+		File cacheFile = fetchBoundingBox(boundingBox);
 		OsmMap map = parseBoundingBox(cacheFile);
 
 		cacheFile.delete();

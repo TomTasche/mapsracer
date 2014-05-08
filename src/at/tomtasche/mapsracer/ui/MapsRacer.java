@@ -21,15 +21,13 @@ import org.jdesktop.swingx.painter.CompoundPainter;
 import at.tomtasche.mapsracer.data.NodeManager;
 import at.tomtasche.mapsracer.map.Car;
 import at.tomtasche.mapsracer.map.MapNode;
-import at.tomtasche.mapsracer.routing.MeinStern;
 
 public class MapsRacer {
 
-	private static final boolean DEBUG_DRAW_GRAPH = false;
+	private static final boolean DEBUG_DRAW_GRAPH = true;
 
 	private static JFrame frame;
 
-	private static MeinStern routing;
 	private static NodeManager nodeManager;
 
 	private static JXMapViewer mapViewer;
@@ -42,9 +40,10 @@ public class MapsRacer {
 		File cacheDirectory = new File("cache");
 		cacheDirectory.mkdir();
 
-		nodeManager = new NodeManager(cacheDirectory);
+		GeoPosition originPosition = new GeoPosition(48.14650327493638,
+				16.329095363616943);
 
-		routing = new MeinStern();
+		nodeManager = new NodeManager(cacheDirectory, originPosition);
 
 		mapViewer = new JXMapViewer();
 
@@ -55,8 +54,7 @@ public class MapsRacer {
 		mapViewer.setTileFactory(tileFactory);
 
 		mapViewer.setZoom(3);
-		// TODO: fetch .osm-file according to this GeoPosition
-		mapViewer.setAddressLocation(new GeoPosition(48.1465, 16.3291));
+		mapViewer.setAddressLocation(originPosition);
 
 		carPainter = new CarPainter();
 		graphPainter = new GraphPainter();
@@ -71,9 +69,8 @@ public class MapsRacer {
 
 		frame = new JFrame();
 		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-		frame.setLocationRelativeTo(null);
 		frame.add(mapViewer);
-		frame.setSize(512, 512);
+		frame.setSize(768, 768);
 
 		frame.addWindowListener(new WindowAdapter() {
 
