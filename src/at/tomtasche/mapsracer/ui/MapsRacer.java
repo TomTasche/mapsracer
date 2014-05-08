@@ -4,9 +4,12 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.FileNotFoundException;
+import java.io.File;
+import java.io.IOException;
 
-import javax.swing.*;
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
 
 import org.jdesktop.swingx.JXMapViewer;
 import org.jdesktop.swingx.OSMTileFactoryInfo;
@@ -35,8 +38,11 @@ public class MapsRacer {
 
 	private static Thread thread;
 
-	public static void main(String[] args) throws FileNotFoundException {
-		nodeManager = new NodeManager();
+	public static void main(String[] args) throws IOException {
+		File cacheDirectory = new File("cache");
+		cacheDirectory.mkdir();
+
+		nodeManager = new NodeManager(cacheDirectory);
 
 		routing = new MeinStern();
 
@@ -64,7 +70,7 @@ public class MapsRacer {
 		mapViewer.setOverlayPainter(painter);
 
 		frame = new JFrame();
-		frame.setDefaultCloseOperation( WindowConstants.EXIT_ON_CLOSE );
+		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		frame.setLocationRelativeTo(null);
 		frame.add(mapViewer);
 		frame.setSize(512, 512);

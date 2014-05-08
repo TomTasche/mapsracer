@@ -113,8 +113,12 @@ public class NodeCache {
 		return false;
 	}
 
-	protected Cluster[][] getClusters() {
-		return clusters;
+	protected Cluster getCluster(int xIndex, int yIndex) {
+		return clusters[xIndex][yIndex];
+	}
+
+	protected void setCluster(Cluster cluster, int xIndex, int yIndex) {
+		clusters[xIndex][yIndex] = cluster;
 	}
 
 	protected Map<MapNode, Set<MapNode>> getGraph() {

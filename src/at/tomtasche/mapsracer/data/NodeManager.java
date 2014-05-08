@@ -1,8 +1,10 @@
 package at.tomtasche.mapsracer.data;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -16,12 +18,12 @@ public class NodeManager {
 
 	private static final boolean AGGRESSIVE_CLEANUP = false;
 
+	private NodeFetcher fetcher;
 	private NodeCache cache;
-	private Cluster[][] clusters;
 
-	public NodeManager() {
+	public NodeManager(File cacheDirectory) throws IOException {
+		this.fetcher = new NodeFetcher(cacheDirectory);
 		this.cache = new NodeCache();
-		this.clusters = cache.getClusters();
 	}
 
 	public void initialize() {
@@ -69,22 +71,23 @@ public class NodeManager {
 			return;
 		}
 
-		// http://www.openstreetmap.org/export
-		final OsmParser parser = new OsmParser(new File("test.osm"));
-		parser.initialize();
-
-		OsmMap map = MapConverter.convert(parser);
-		for (MapPath street : map.getStreets()) {
-			cache.addStreet(street);
+		try {
+			List<MapPath> streets = fetcher.getBoundingBox(16.31919, 48.15234, 16.33346, 48.14856);
+			for (MapPath street : streets) {
+				cache.addStreet(street);
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
 	private Cluster getCluster(Direction direction) {
-		return clusters[direction.getyIndex()][direction.getxIndex()];
+		return cache.getCluster(direction.getxIndex(), direction.getyIndex());
 	}
 
 	private void setCluster(Direction direction, Cluster cluster) {
-		clusters[direction.getyIndex()][direction.getxIndex()] = cluster;
+		cache.setCluster(cluster, direction.getxIndex(), direction.getyIndex());
 	}
 
 	private void moveCluster(Direction fromDirection, Direction toDirection) {
