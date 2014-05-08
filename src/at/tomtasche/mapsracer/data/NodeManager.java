@@ -63,6 +63,7 @@ public class NodeManager {
 	}
 
 	private BoundingBox calculateBoundingBox(GeoPosition middle) {
+		// TODO:
 		return new BoundingBox(16.31919, 48.15234, 16.33346, 48.14856);
 	}
 
@@ -92,10 +93,10 @@ public class NodeManager {
 		case LEFT:
 		case RIGHT:
 		case TOP:
-			// TODO: load new cluster
-
-			// there is always a cluster in the middle!
+			// there is always a cluster in the middle after initialization!
 			Cluster middleCluster = getCluster(Direction.MIDDLE);
+
+			// TODO: load new cluster
 
 			return;
 		}
