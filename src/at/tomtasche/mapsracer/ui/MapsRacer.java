@@ -6,8 +6,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.FileNotFoundException;
 
-import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 
 import org.jdesktop.swingx.JXMapViewer;
 import org.jdesktop.swingx.OSMTileFactoryInfo;
@@ -65,7 +64,7 @@ public class MapsRacer {
 		mapViewer.setOverlayPainter(painter);
 
 		frame = new JFrame();
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setDefaultCloseOperation( WindowConstants.EXIT_ON_CLOSE );
 		frame.setLocationRelativeTo(null);
 		frame.add(mapViewer);
 		frame.setSize(512, 512);
