@@ -73,18 +73,18 @@ public class NodeFetcher {
 		}
 	}
 
-	private OsmMap parseBoundingBox(File cacheFile) {
+	private OsmMap parseBoundingBox(File cacheFile, Cluster cluster) {
 		// http://www.openstreetmap.org/export
 		final OsmParser parser = new OsmParser(cacheFile);
 		parser.initialize();
 
-		return MapConverter.convert(parser);
+		return MapConverter.convert(parser, cluster);
 	}
 
-	protected List<MapPath> getBoundingBox(BoundingBox boundingBox)
-			throws IOException {
+	protected List<MapPath> getBoundingBox(BoundingBox boundingBox,
+			Cluster cluster) throws IOException {
 		File cacheFile = fetchBoundingBox(boundingBox);
-		OsmMap map = parseBoundingBox(cacheFile);
+		OsmMap map = parseBoundingBox(cacheFile, cluster);
 
 		cacheFile.delete();
 

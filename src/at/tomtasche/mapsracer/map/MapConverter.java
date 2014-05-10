@@ -13,21 +13,16 @@ import org.openstreetmap.osmosis.core.domain.v0_6.Way;
 import org.openstreetmap.osmosis.core.domain.v0_6.WayNode;
 
 import at.tomtasche.mapsracer.data.Cluster;
+import at.tomtasche.mapsracer.math.CoordinateUtil;
 import at.tomtasche.mapsracer.osm.OsmMap;
 import at.tomtasche.mapsracer.osm.OsmParser;
 
 public final class MapConverter {
 
-	/**
-	 * origin-cluster
-	 */
-	// TODO: fix boundingbox
-	private static final Cluster cluster = new Cluster(0, 0, null);
-
 	private MapConverter() {
 	}
 
-	public static OsmMap convert(OsmParser parser) {
+	public static OsmMap convert(OsmParser parser, Cluster cluster) {
 		Map<Long, MapNode> nodeMap = new HashMap<>();
 
 		List<MapPath> streets = new LinkedList<>();
@@ -50,7 +45,7 @@ public final class MapConverter {
 			for (WayNode wayNode : wayNodes) {
 				MapNode mapNode = nodeMap.get(wayNode.getNodeId());
 				if (mapNode == null) {
-					mapNode = toMapNode(parser, wayNode);
+					mapNode = toMapNode(parser, wayNode, cluster);
 					nodeMap.put(wayNode.getNodeId(), mapNode);
 				}
 
@@ -74,19 +69,21 @@ public final class MapConverter {
 			streets.add(path);
 		}
 
-		double mapWidth = distFrom(parser.getMinLat(), parser.getMinLon(),
+		double mapWidth = CoordinateUtil.distance(parser.getMinLat(), parser.getMinLon(),
 				parser.getMinLat(), parser.getMaxLon());
-		double mapHeight = distFrom(parser.getMinLat(), parser.getMinLon(),
+		double mapHeight = CoordinateUtil.distance(parser.getMinLat(), parser.getMinLon(),
 				parser.getMaxLat(), parser.getMinLon());
 
 		return new OsmMap((int) mapWidth, (int) mapHeight, streets, neighborMap);
 	}
 
-	private static MapNode toMapNode(OsmParser parser, WayNode wayNode) {
-		return toMapNode(parser, parser.toNode(wayNode));
+	private static MapNode toMapNode(OsmParser parser, WayNode wayNode,
+			Cluster cluster) {
+		return toMapNode(parser, parser.toNode(wayNode), cluster);
 	}
 
-	private static MapNode toMapNode(OsmParser parser, Node node) {
+	private static MapNode toMapNode(OsmParser parser, Node node,
+			Cluster cluster) {
 		return new MapNode(node.getLongitude(), node.getLatitude(), cluster);
 	}
 
@@ -95,8 +92,8 @@ public final class MapConverter {
 	}
 
 	private static int calculateX(OsmParser parser, double longitude) {
-		return (int) distFrom(parser.getMinLat(), parser.getMinLon(),
-				parser.getMinLat(), longitude);
+		return (int) CoordinateUtil.distance(parser.getMinLat(),
+				parser.getMinLon(), parser.getMinLat(), longitude);
 	}
 
 	private static int calculateY(OsmParser parser, Node node) {
@@ -104,24 +101,7 @@ public final class MapConverter {
 	}
 
 	private static int calculateY(OsmParser parser, double latitude) {
-		return (int) distFrom(parser.getMinLat(), parser.getMinLon(), latitude,
-				parser.getMinLon());
-	}
-
-	private static double distFrom(double lat1, double lng1, double lat2,
-			double lng2) {
-		double earthRadius = 3958.75;
-		double dLat = Math.toRadians(lat2 - lat1);
-		double dLng = Math.toRadians(lng2 - lng1);
-		double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
-				+ Math.cos(Math.toRadians(lat1))
-				* Math.cos(Math.toRadians(lat2)) * Math.sin(dLng / 2)
-				* Math.sin(dLng / 2);
-		double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-		double dist = earthRadius * c;
-
-		int meterConversion = 1609;
-
-		return dist * meterConversion;
+		return (int) CoordinateUtil.distance(parser.getMinLat(),
+				parser.getMinLon(), latitude, parser.getMinLon());
 	}
 }

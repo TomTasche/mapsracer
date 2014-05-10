@@ -8,7 +8,6 @@ import java.io.File;
 import java.io.IOException;
 
 import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import org.jdesktop.swingx.JXMapViewer;
@@ -40,10 +39,7 @@ public class MapsRacer {
 		File cacheDirectory = new File("cache");
 		cacheDirectory.mkdir();
 
-		GeoPosition originPosition = new GeoPosition(48.14650327493638,
-				16.329095363616943);
-
-		nodeManager = new NodeManager(cacheDirectory, originPosition);
+		nodeManager = new NodeManager(cacheDirectory);
 
 		mapViewer = new JXMapViewer();
 
@@ -53,8 +49,10 @@ public class MapsRacer {
 
 		mapViewer.setTileFactory(tileFactory);
 
+		mapViewer.setAddressLocation(new GeoPosition(48.14650327493638,
+				16.329095363616943));
+
 		mapViewer.setZoom(3);
-		mapViewer.setAddressLocation(originPosition);
 
 		carPainter = new CarPainter();
 		graphPainter = new GraphPainter();

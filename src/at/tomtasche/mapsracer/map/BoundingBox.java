@@ -1,5 +1,7 @@
 package at.tomtasche.mapsracer.map;
 
+import at.tomtasche.mapsracer.math.CoordinateUtil;
+
 public class BoundingBox {
 
 	// coordinates
@@ -29,5 +31,21 @@ public class BoundingBox {
 
 	public double getBottom() {
 		return bottom;
+	}
+
+	/**
+	 * @return height of this BoundingBox in meter
+	 */
+	public double getHeight() {
+		// top-left to bottom-left
+		return CoordinateUtil.distance(top, left, bottom, left);
+	}
+
+	/**
+	 * @return width of this BoundingBox in meter
+	 */
+	public double getWidth() {
+		// top-left to top-right
+		return CoordinateUtil.distance(top, left, top, right);
 	}
 }

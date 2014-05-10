@@ -16,12 +16,11 @@ import org.jdesktop.swingx.mapviewer.GeoPosition;
 import at.tomtasche.mapsracer.map.BoundingBox;
 import at.tomtasche.mapsracer.map.MapNode;
 import at.tomtasche.mapsracer.map.MapPath;
+import at.tomtasche.mapsracer.math.CoordinateUtil;
 
 public class NodeManager {
 
 	private static final boolean AGGRESSIVE_CLEANUP = false;
-
-	private final GeoPosition originPosition;
 
 	private NodeFetcher fetcher;
 	private NodeCache cache;
@@ -30,10 +29,7 @@ public class NodeManager {
 
 	private JXMapViewer mapViewer;
 
-	public NodeManager(File cacheDirectory, GeoPosition originPosition)
-			throws IOException {
-		this.originPosition = originPosition;
-
+	public NodeManager(File cacheDirectory) throws IOException {
 		this.fetcher = new NodeFetcher(cacheDirectory);
 		this.cache = new NodeCache();
 	}
@@ -46,20 +42,19 @@ public class NodeManager {
 	public void initialize(JXMapViewer mapViewer) {
 		this.mapViewer = mapViewer;
 
-		fetchCluster(Direction.MIDDLE);
+		fetchCluster(Direction.CENTER);
 
-		// TODO:
-		// updateClusters();
+		updateClusters();
 	}
 
 	public void moveClusters(Direction direction) {
-		if (direction == Direction.MIDDLE) {
+		if (direction == Direction.CENTER) {
 			System.err.println("what are you doing?");
 			return;
 		}
 
-		moveCluster(Direction.MIDDLE, direction);
-		moveCluster(direction.getOpposite(), Direction.MIDDLE);
+		moveCluster(Direction.CENTER, direction);
+		moveCluster(direction.getOpposite(), Direction.CENTER);
 
 		updateClusters();
 
@@ -74,64 +69,148 @@ public class NodeManager {
 		}
 	}
 
-	private BoundingBox calculateBoundingBox(Point2D middle) {
-		// TODO: only works for middle-cluster right now
-
-		Rectangle viewportBounds = mapViewer.getViewportBounds();
-
-		Point2D upperLeftPoint = new Point2D.Double(viewportBounds.getMinX(),
+	private BoundingBox toBoundingBox(Rectangle viewportBounds) {
+		Point2D topLeftPoint = new Point2D.Double(viewportBounds.getMinX(),
 				viewportBounds.getMinY());
-		GeoPosition topLeftPosition = pixelToGeo(upperLeftPoint);
+		GeoPosition topLeftPosition = pixelToGeo(topLeftPoint);
 
 		Point2D bottomRightPoint = new Point2D.Double(viewportBounds.getMaxX(),
 				viewportBounds.getMaxY());
 		GeoPosition bottomRightPosition = pixelToGeo(bottomRightPoint);
 
+		return boundingBoxFromGeoPositions(topLeftPosition, bottomRightPosition);
+	}
+
+	private BoundingBox boundingBoxFromGeoPositions(
+			GeoPosition topLeftPosition, GeoPosition bottomRightPosition) {
 		return new BoundingBox(topLeftPosition.getLongitude(),
 				topLeftPosition.getLatitude(),
 				bottomRightPosition.getLongitude(),
 				bottomRightPosition.getLatitude());
 	}
 
-	private void fetchCluster(Direction direction) {
+	private double directionToDirection(Direction direction) {
 		switch (direction) {
-		case MIDDLE:
+		case BOTTOM:
+			return 180;
+		case LEFT:
+			return 270;
+		case RIGHT:
+			return 90;
+		case TOP:
+			return 0;
+		default:
+			throw new RuntimeException("unknwon direction: " + direction);
+		}
+	}
+
+	private BoundingBox calculateBoundingBox(Cluster center, Direction direction) {
+		if (Direction.CENTER == direction) {
+			return center.getBoundingBox();
+		}
+
+		BoundingBox oldBoundingBox = center.getBoundingBox();
+
+		double oldWidth = oldBoundingBox.getWidth();
+		double oldHeight = oldBoundingBox.getHeight();
+
+		GeoPosition oldTopLeftPosition = new GeoPosition(
+				oldBoundingBox.getTop(), oldBoundingBox.getLeft());
+		GeoPosition oldTopRightPosition = new GeoPosition(
+				oldBoundingBox.getTop(), oldBoundingBox.getRight());
+		GeoPosition oldBottomRightPosition = new GeoPosition(
+				oldBoundingBox.getBottom(), oldBoundingBox.getRight());
+		GeoPosition oldBottomLeftPosition = new GeoPosition(
+				oldBoundingBox.getBottom(), oldBoundingBox.getLeft());
+
+		GeoPosition newTopLeftPosition = null;
+		GeoPosition newBottomRightPosition = null;
+		switch (direction) {
+		case BOTTOM:
+			// y-height
+			newTopLeftPosition = oldBottomLeftPosition;
+
+			newBottomRightPosition = CoordinateUtil.positionAt(
+					oldBottomRightPosition, directionToDirection(direction),
+					oldHeight);
+
+			break;
+		case LEFT:
+			// x-width
+			newTopLeftPosition = CoordinateUtil.positionAt(oldTopLeftPosition,
+					directionToDirection(direction), oldWidth);
+
+			newBottomRightPosition = oldBottomLeftPosition;
+
+			break;
+		case RIGHT:
+			// x+width
+			newTopLeftPosition = oldTopRightPosition;
+
+			newBottomRightPosition = CoordinateUtil.positionAt(
+					oldBottomRightPosition, directionToDirection(direction),
+					oldHeight);
+
+			break;
+		case TOP:
+			// y+width
+			newTopLeftPosition = CoordinateUtil.positionAt(oldTopLeftPosition,
+					directionToDirection(direction), oldWidth);
+
+			newBottomRightPosition = oldTopRightPosition;
+
+			break;
+		default:
+			throw new RuntimeException("unknwon direction: " + direction);
+		}
+
+		BoundingBox newBoundingBox = boundingBoxFromGeoPositions(
+				newTopLeftPosition, newBottomRightPosition);
+
+		System.out.println("old width: " + oldWidth + " vs new width: "
+				+ newBoundingBox.getWidth());
+		System.out.println("old height: " + oldHeight + " vs new height: "
+				+ newBoundingBox.getHeight());
+
+		return newBoundingBox;
+	}
+
+	private void fetchCluster(Direction direction) {
+		BoundingBox boundingBox;
+		if (direction == Direction.CENTER) {
 			// only called once at initialization!
 			if (initialized) {
-				throw new RuntimeException(
-						"fetchCluster for Direction.MIDDLE called twice. this should never happen!");
+				throw new RuntimeException("fetchCluster for " + direction
+						+ " called twice. this should never happen!");
 			}
 			initialized = true;
 
-			try {
-				Point2D centerPoint = geoToPixel(originPosition);
+			boundingBox = toBoundingBox(mapViewer.getViewportBounds());
+		} else {
+			// there is always a cluster in the center after initialization!
+			Cluster centerCluster = getCluster(Direction.CENTER);
 
-				BoundingBox centerBoundingBox = calculateBoundingBox(centerPoint);
+			boundingBox = calculateBoundingBox(centerCluster, direction);
+		}
 
-				Cluster centerCluster = new Cluster(0, 0, centerBoundingBox);
-				setCluster(Direction.MIDDLE, centerCluster);
+		Cluster cluster = new Cluster(direction, boundingBox);
+		setCluster(direction, cluster);
 
-				List<MapPath> streets = fetcher
-						.getBoundingBox(centerBoundingBox);
-				for (MapPath street : streets) {
-					cache.addStreet(street);
-				}
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
+		try {
+			List<MapPath> streets = fetcher
+					.getBoundingBox(boundingBox, cluster);
+			for (MapPath street : streets) {
+				cache.addStreet(street);
+			}
+		} catch (IOException e) {
+			if (Direction.CENTER == direction) {
+				throw new RuntimeException(
+						"could not initialize NodeManager: loading "
+								+ direction + " failed", e);
+			} else {
+				// TODO: retry?
 				e.printStackTrace();
 			}
-
-			break;
-		case BOTTOM:
-		case LEFT:
-		case RIGHT:
-		case TOP:
-			// there is always a cluster in the middle after initialization!
-			Cluster middleCluster = getCluster(Direction.MIDDLE);
-
-			// TODO: load new cluster
-
-			return;
 		}
 	}
 
@@ -173,7 +252,7 @@ public class NodeManager {
 	}
 
 	public enum Direction {
-		LEFT(0, 1), TOP(1, 0), RIGHT(2, 1), BOTTOM(1, 2), MIDDLE(1, 1);
+		LEFT(0, 1), TOP(1, 0), RIGHT(2, 1), BOTTOM(1, 2), CENTER(1, 1);
 
 		private final int xIndex;
 		private final int yIndex;
@@ -201,7 +280,7 @@ public class NodeManager {
 				return LEFT;
 			case TOP:
 				return BOTTOM;
-			case MIDDLE:
+			case CENTER:
 			default:
 				return null;
 			}

@@ -1,5 +1,6 @@
 package at.tomtasche.mapsracer.data;
 
+import at.tomtasche.mapsracer.data.NodeManager.Direction;
 import at.tomtasche.mapsracer.map.BoundingBox;
 
 public class Cluster {
@@ -10,9 +11,9 @@ public class Cluster {
 
 	private BoundingBox boundingBox;
 
-	public Cluster(int x, int y, BoundingBox boundingBox) {
-		this.x = x;
-		this.y = y;
+	public Cluster(Direction direction, BoundingBox boundingBox) {
+		this.x = direction.getxIndex();
+		this.y = direction.getyIndex();
 
 		this.boundingBox = boundingBox;
 	}
