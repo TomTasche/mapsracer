@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -114,14 +115,10 @@ public class NodeManager {
 		double oldWidth = oldBoundingBox.getWidth();
 		double oldHeight = oldBoundingBox.getHeight();
 
-		GeoPosition oldTopLeftPosition = new GeoPosition(
-				oldBoundingBox.getTop(), oldBoundingBox.getLeft());
-		GeoPosition oldTopRightPosition = new GeoPosition(
-				oldBoundingBox.getTop(), oldBoundingBox.getRight());
-		GeoPosition oldBottomRightPosition = new GeoPosition(
-				oldBoundingBox.getBottom(), oldBoundingBox.getRight());
-		GeoPosition oldBottomLeftPosition = new GeoPosition(
-				oldBoundingBox.getBottom(), oldBoundingBox.getLeft());
+		GeoPosition oldTopLeftPosition = oldBoundingBox.getTopLeft();
+		GeoPosition oldTopRightPosition = oldBoundingBox.getTopRight();
+		GeoPosition oldBottomRightPosition = oldBoundingBox.getBottomRight();
+		GeoPosition oldBottomLeftPosition = oldBoundingBox.getBottomLeft();
 
 		GeoPosition newTopLeftPosition = null;
 		GeoPosition newBottomRightPosition = null;
@@ -243,6 +240,20 @@ public class NodeManager {
 
 	public MapPath getStreet(long id) {
 		return cache.getStreets().get(id);
+	}
+
+	public Collection<Cluster> getClusters() {
+		List<Cluster> clusters = new LinkedList<>();
+		Cluster[][] clusterTable = cache.getClusters();
+		for (int i = 0; i < clusterTable.length; i++) {
+			Cluster[] clusterArray = clusterTable[i];
+
+			for (int j = 0; j < clusterArray.length; j++) {
+				clusters.add(clusterArray[j]);
+			}
+		}
+
+		return Collections.unmodifiableCollection(clusters);
 	}
 
 	public Collection<MapPath> getStreets() {

@@ -15,11 +15,6 @@ import org.jdesktop.swingx.painter.Painter;
 import at.tomtasche.mapsracer.map.MapNode;
 import at.tomtasche.mapsracer.map.MapPath;
 
-/**
- * Paints a route
- * 
- * @author Martin Steiger
- */
 public class GraphPainter implements Painter<JXMapViewer> {
 	private Color color = Color.RED;
 	private boolean antiAlias = true;

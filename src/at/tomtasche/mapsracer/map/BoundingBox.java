@@ -1,5 +1,7 @@
 package at.tomtasche.mapsracer.map;
 
+import org.jdesktop.swingx.mapviewer.GeoPosition;
+
 import at.tomtasche.mapsracer.math.CoordinateUtil;
 
 public class BoundingBox {
@@ -31,6 +33,22 @@ public class BoundingBox {
 
 	public double getBottom() {
 		return bottom;
+	}
+
+	public GeoPosition getTopLeft() {
+		return new GeoPosition(top, left);
+	}
+
+	public GeoPosition getTopRight() {
+		return new GeoPosition(top, right);
+	}
+
+	public GeoPosition getBottomRight() {
+		return new GeoPosition(bottom, right);
+	}
+
+	public GeoPosition getBottomLeft() {
+		return new GeoPosition(bottom, left);
 	}
 
 	/**

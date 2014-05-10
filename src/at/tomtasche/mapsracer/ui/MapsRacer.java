@@ -23,15 +23,16 @@ import at.tomtasche.mapsracer.map.MapNode;
 
 public class MapsRacer {
 
-	private static final boolean DEBUG_DRAW_GRAPH = true;
+	private static final boolean DEBUG = false;
 
 	private static JFrame frame;
 
 	private static NodeManager nodeManager;
 
 	private static JXMapViewer mapViewer;
-	private static GraphPainter graphPainter;
 	private static CarPainter carPainter;
+	private static GraphPainter graphPainter;
+	private static ClusterPainter clusterPainter;
 
 	private static Thread thread;
 
@@ -56,11 +57,13 @@ public class MapsRacer {
 
 		carPainter = new CarPainter();
 		graphPainter = new GraphPainter();
+		clusterPainter = new ClusterPainter();
 
 		CompoundPainter<JXMapViewer> painter = new CompoundPainter<JXMapViewer>();
 		painter.addPainter(carPainter);
-		if (DEBUG_DRAW_GRAPH) {
+		if (DEBUG) {
 			painter.addPainter(graphPainter);
+			painter.addPainter(clusterPainter);
 		}
 
 		mapViewer.setOverlayPainter(painter);
@@ -98,6 +101,7 @@ public class MapsRacer {
 
 				graphPainter.initialize(nodeManager.getStreets());
 				carPainter.initialize(nodeManager.getGraph());
+				clusterPainter.initialize(nodeManager.getClusters());
 
 				final Car car = new Car();
 				car.setVelocity(100);
