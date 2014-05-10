@@ -68,7 +68,7 @@ public class MapsRacer {
 		frame = new JFrame();
 		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		frame.add(mapViewer);
-		frame.setSize(768, 768);
+		frame.setSize(256, 256);
 
 		frame.addWindowListener(new WindowAdapter() {
 

@@ -38,33 +38,31 @@ public class CoordinateUtil {
 	 * @param direction
 	 *            in degrees, clockwise from north
 	 * @param distance
-	 *            in km
+	 *            in m
 	 * @return
 	 */
 	public static GeoPosition positionAt(GeoPosition position,
 			double direction, double distance) {
+		distance /= 1000;
+
 		double bearing = Math.toRadians(direction);
-		
+
 		double latitude1 = Math.toRadians(position.getLatitude());
 		double longitude1 = Math.toRadians(position.getLongitude());
 
 		double earthDistance = distance / EARTH_RADIUS_KM;
 		double latitude2 = Math.asin(Math.sin(latitude1)
-				* Math.cos(earthDistance)
-				+ Math.cos(latitude1)
-				* Math.sin(earthDistance)
-				* Math.cos(bearing));
+				* Math.cos(earthDistance) + Math.cos(latitude1)
+				* Math.sin(earthDistance) * Math.cos(bearing));
 		double longitude2 = longitude1
 				+ Math.atan2(
-						Math.sin(bearing)
-								* Math.sin(earthDistance)
-								* Math.cos(latitude1),
-						Math.cos(earthDistance)
-								- Math.sin(latitude1)
-								* Math.sin(latitude2));
-		
+						Math.sin(bearing) * Math.sin(earthDistance)
+								* Math.cos(latitude1), Math.cos(earthDistance)
+								- Math.sin(latitude1) * Math.sin(latitude2));
+
 		longitude2 = (longitude2 + 3 * Math.PI) % (2 * Math.PI) - Math.PI;
 
-		return new GeoPosition(Math.toDegrees(latitude2), Math.toDegrees(longitude2));
+		return new GeoPosition(Math.toDegrees(latitude2),
+				Math.toDegrees(longitude2));
 	}
 }

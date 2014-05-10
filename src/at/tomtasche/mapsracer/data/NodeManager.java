@@ -212,6 +212,8 @@ public class NodeManager {
 				e.printStackTrace();
 			}
 		}
+
+		System.out.println("finished loading " + direction);
 	}
 
 	private Point2D geoToPixel(GeoPosition position) {
