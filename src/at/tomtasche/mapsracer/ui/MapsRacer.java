@@ -9,9 +9,11 @@ import java.io.IOException;
 
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
+import javax.swing.event.MouseInputListener;
 
 import org.jdesktop.swingx.JXMapViewer;
 import org.jdesktop.swingx.OSMTileFactoryInfo;
+import org.jdesktop.swingx.input.PanMouseInputListener;
 import org.jdesktop.swingx.mapviewer.DefaultTileFactory;
 import org.jdesktop.swingx.mapviewer.GeoPosition;
 import org.jdesktop.swingx.mapviewer.TileFactoryInfo;
@@ -68,10 +70,17 @@ public class MapsRacer {
 
 		mapViewer.setOverlayPainter(painter);
 
+		if (DEBUG) {
+			MouseInputListener mouseListener = new PanMouseInputListener(
+					mapViewer);
+			mapViewer.addMouseListener(mouseListener);
+			mapViewer.addMouseMotionListener(mouseListener);
+		}
+
 		frame = new JFrame();
 		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		frame.add(mapViewer);
-		frame.setResizable(false);
+		frame.setResizable(DEBUG);
 		frame.setSize(768, 768);
 
 		frame.addWindowListener(new WindowAdapter() {
