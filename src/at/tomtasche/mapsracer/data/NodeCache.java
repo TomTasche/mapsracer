@@ -1,6 +1,7 @@
 package at.tomtasche.mapsracer.data;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -24,11 +25,17 @@ public class NodeCache {
 	private final Collection<Cluster> clusterCollection;
 
 	public NodeCache() {
-		this.graph = new HashMap<>();
-		this.streets = new HashMap<>();
+		Map<MapNode, Set<MapNode>> tempGraph = new HashMap<>();
+		this.graph = Collections.synchronizedMap(tempGraph);
+
+		Map<Long, MapPath> tempStreets = new HashMap<>();
+		this.streets = Collections.synchronizedMap(tempStreets);
 
 		this.clusters = new Cluster[3][3];
-		this.clusterCollection = new LinkedList<>();
+
+		Collection<Cluster> tempClusterCollection = new LinkedList<>();
+		this.clusterCollection = Collections
+				.synchronizedCollection(tempClusterCollection);
 	}
 
 	protected synchronized void addStreet(MapPath newStreet) {
@@ -116,11 +123,12 @@ public class NodeCache {
 		return false;
 	}
 
-	protected Cluster getCluster(int xIndex, int yIndex) {
+	protected synchronized Cluster getCluster(int xIndex, int yIndex) {
 		return clusters[xIndex][yIndex];
 	}
 
-	protected void setCluster(Cluster cluster, int xIndex, int yIndex) {
+	protected synchronized void setCluster(Cluster cluster, int xIndex,
+			int yIndex) {
 		clusters[xIndex][yIndex] = cluster;
 
 		// TODO: optimize
@@ -134,7 +142,7 @@ public class NodeCache {
 		}
 	}
 
-	public Collection<Cluster> getClusters() {
+	public synchronized Collection<Cluster> getClusters() {
 		return clusterCollection;
 	}
 

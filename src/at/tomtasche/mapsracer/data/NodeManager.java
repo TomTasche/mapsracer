@@ -17,7 +17,11 @@ import at.tomtasche.mapsracer.map.BoundingBox;
 import at.tomtasche.mapsracer.map.MapNode;
 import at.tomtasche.mapsracer.map.MapPath;
 import at.tomtasche.mapsracer.math.CoordinateUtil;
+import at.tomtasche.mapsracer.ui.MapsRacer;
 
+/**
+ * not thread-safe at all!
+ */
 public class NodeManager {
 
 	private static final boolean AGGRESSIVE_CLEANUP = false;
@@ -163,10 +167,12 @@ public class NodeManager {
 		BoundingBox newBoundingBox = boundingBoxFromGeoPositions(
 				newTopLeftPosition, newBottomRightPosition);
 
-		System.out.println("old width: " + oldWidth + " vs new width: "
-				+ newBoundingBox.getWidth());
-		System.out.println("old height: " + oldHeight + " vs new height: "
-				+ newBoundingBox.getHeight());
+		if (MapsRacer.DEBUG) {
+			System.out.println("old width: " + oldWidth + " vs new width: "
+					+ newBoundingBox.getWidth());
+			System.out.println("old height: " + oldHeight + " vs new height: "
+					+ newBoundingBox.getHeight());
+		}
 
 		return newBoundingBox;
 	}
@@ -209,7 +215,9 @@ public class NodeManager {
 			}
 		}
 
-		System.out.println("finished loading " + direction);
+		if (MapsRacer.DEBUG) {
+			System.out.println("finished loading " + direction);
+		}
 	}
 
 	private Point2D geoToPixel(GeoPosition position) {

@@ -18,6 +18,8 @@ import org.openstreetmap.osmosis.core.task.v0_6.Sink;
 import org.openstreetmap.osmosis.xml.common.CompressionMethod;
 import org.openstreetmap.osmosis.xml.v0_6.XmlReader;
 
+import at.tomtasche.mapsracer.ui.MapsRacer;
+
 public class OsmParser {
 
 	private static final List<String> STREET_DISQUALIFIERS;
@@ -128,7 +130,7 @@ public class OsmParser {
 							links.add(toNode(wayNodes.get(i + 1)));
 						}
 					}
-				} else {
+				} else if (MapsRacer.DEBUG) {
 					System.out.println("unknown entity: " + entity.getType());
 				}
 			}

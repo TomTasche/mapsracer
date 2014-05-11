@@ -6,6 +6,7 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.geom.Point2D;
+import java.util.ArrayList;
 import java.util.Collection;
 
 import org.jdesktop.swingx.JXMapViewer;
@@ -16,7 +17,6 @@ import at.tomtasche.mapsracer.data.Cluster;
 import at.tomtasche.mapsracer.map.BoundingBox;
 
 public class ClusterPainter implements Painter<JXMapViewer> {
-	private boolean antiAlias = true;
 
 	private Collection<Cluster> clusters;
 
@@ -36,15 +36,15 @@ public class ClusterPainter implements Painter<JXMapViewer> {
 		Rectangle rect = map.getViewportBounds();
 		g.translate(-rect.x, -rect.y);
 
-		if (antiAlias)
-			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-					RenderingHints.VALUE_ANTIALIAS_ON);
+		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+				RenderingHints.VALUE_ANTIALIAS_ON);
 
 		// do the drawing
 		g.setColor(Color.BLUE);
 		g.setStroke(new BasicStroke(4));
 
-		for (Cluster cluster : clusters) {
+		Collection<Cluster> clustersCopy = new ArrayList<>(clusters);
+		for (Cluster cluster : clustersCopy) {
 			if (cluster == null) {
 				continue;
 			}
@@ -60,12 +60,10 @@ public class ClusterPainter implements Painter<JXMapViewer> {
 
 		GeoPosition topLeftPosition = boundingBox.getTopLeft();
 		GeoPosition topRightPosition = boundingBox.getTopRight();
-		GeoPosition bottomRightPosition = boundingBox.getBottomRight();
 		GeoPosition bottomLeftPosition = boundingBox.getBottomLeft();
 
 		Point2D topLeftPoint = positionToPoint(map, topLeftPosition);
 		Point2D topRightPoint = positionToPoint(map, topRightPosition);
-		Point2D bottomRightPoint = positionToPoint(map, bottomRightPosition);
 		Point2D bottomLeftPoint = positionToPoint(map, bottomLeftPosition);
 
 		double width = topLeftPoint.distance(topRightPoint);

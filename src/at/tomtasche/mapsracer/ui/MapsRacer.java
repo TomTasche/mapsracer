@@ -25,7 +25,7 @@ import at.tomtasche.mapsracer.map.MapNode;
 
 public class MapsRacer {
 
-	private static final boolean DEBUG = true;
+	public static final boolean DEBUG = true;
 
 	private static JFrame frame;
 

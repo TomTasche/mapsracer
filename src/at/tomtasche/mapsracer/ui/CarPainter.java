@@ -8,6 +8,8 @@ import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -26,10 +28,6 @@ import at.tomtasche.mapsracer.math.Vector2d;
 import at.tomtasche.mapsracer.math.VectorMagic;
 
 public class CarPainter implements Painter<JXMapViewer> {
-
-	private static final boolean DEBUG = false;
-
-	private boolean antiAlias = true;
 
 	private Map<MapNode, Set<MapNode>> graph;
 
@@ -64,9 +62,8 @@ public class CarPainter implements Painter<JXMapViewer> {
 		Rectangle rect = map.getViewportBounds();
 		g.translate(-rect.x, -rect.y);
 
-		if (antiAlias)
-			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-					RenderingHints.VALUE_ANTIALIAS_ON);
+		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+				RenderingHints.VALUE_ANTIALIAS_ON);
 
 		long tmp = System.nanoTime();
 		if (lastNano == -1) {
@@ -77,7 +74,8 @@ public class CarPainter implements Painter<JXMapViewer> {
 
 		lastNano = tmp;
 
-		for (Car car : cars) {
+		Collection<Car> carsCopy = new ArrayList<>(cars);
+		for (Car car : carsCopy) {
 			double newDistance = car.getDistance() + car.getVelocity() * time;
 
 			while (true) {
@@ -124,7 +122,7 @@ public class CarPainter implements Painter<JXMapViewer> {
 						20);
 			}
 
-			if (DEBUG) {
+			if (MapsRacer.DEBUG) {
 				geoPosition = new GeoPosition(car.getFrom().getyLat(), car
 						.getFrom().getxLon());
 
