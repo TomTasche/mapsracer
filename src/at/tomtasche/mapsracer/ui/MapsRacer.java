@@ -25,7 +25,7 @@ import at.tomtasche.mapsracer.map.MapNode;
 
 public class MapsRacer {
 
-	private static final boolean DEBUG = false;
+	private static final boolean DEBUG = true;
 
 	private static JFrame frame;
 
@@ -102,16 +102,16 @@ public class MapsRacer {
 
 			@Override
 			public void run() {
+				graphPainter.initialize(nodeManager.getStreets());
+				carPainter.initialize(nodeManager.getGraph());
+				clusterPainter.initialize(nodeManager.getClusters());
+
 				nodeManager.initialize(mapViewer);
 
 				MapNode start = nodeManager.getStreets().iterator().next()
 						.getNodes().iterator().next();
 				MapNode end = nodeManager.getGraph().get(start).iterator()
 						.next();
-
-				graphPainter.initialize(nodeManager.getStreets());
-				carPainter.initialize(nodeManager.getGraph());
-				clusterPainter.initialize(nodeManager.getClusters());
 
 				final Car car = new Car();
 				car.setVelocity(100);

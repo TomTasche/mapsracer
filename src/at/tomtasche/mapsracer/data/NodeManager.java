@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -243,17 +242,7 @@ public class NodeManager {
 	}
 
 	public Collection<Cluster> getClusters() {
-		List<Cluster> clusters = new LinkedList<>();
-		Cluster[][] clusterTable = cache.getClusters();
-		for (int i = 0; i < clusterTable.length; i++) {
-			Cluster[] clusterArray = clusterTable[i];
-
-			for (int j = 0; j < clusterArray.length; j++) {
-				clusters.add(clusterArray[j]);
-			}
-		}
-
-		return Collections.unmodifiableCollection(clusters);
+		return Collections.unmodifiableCollection(cache.getClusters());
 	}
 
 	public Collection<MapPath> getStreets() {
