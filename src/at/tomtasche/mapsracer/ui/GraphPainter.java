@@ -1,4 +1,4 @@
-package at.tomtasche.mapsracer;
+package at.tomtasche.mapsracer.ui;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -6,6 +6,7 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.geom.Point2D;
+import java.util.ArrayList;
 import java.util.Collection;
 
 import org.jdesktop.swingx.JXMapViewer;
@@ -15,14 +16,7 @@ import org.jdesktop.swingx.painter.Painter;
 import at.tomtasche.mapsracer.map.MapNode;
 import at.tomtasche.mapsracer.map.MapPath;
 
-/**
- * Paints a route
- * 
- * @author Martin Steiger
- */
 public class GraphPainter implements Painter<JXMapViewer> {
-	private Color color = Color.RED;
-	private boolean antiAlias = true;
 
 	private Collection<MapPath> streets;
 
@@ -42,23 +36,23 @@ public class GraphPainter implements Painter<JXMapViewer> {
 		Rectangle rect = map.getViewportBounds();
 		g.translate(-rect.x, -rect.y);
 
-		if (antiAlias)
-			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-					RenderingHints.VALUE_ANTIALIAS_ON);
+		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+				RenderingHints.VALUE_ANTIALIAS_ON);
 
 		// do the drawing
 		g.setColor(Color.BLACK);
 		g.setStroke(new BasicStroke(4));
 
-		for (MapPath street : streets) {
+		Collection<MapPath> streetsCopy = new ArrayList<>(streets);
+		for (MapPath street : streetsCopy) {
 			drawStreet(g, map, street);
 		}
 
 		// do the drawing again
-		g.setColor(color);
+		g.setColor(Color.RED);
 		g.setStroke(new BasicStroke(2));
 
-		for (MapPath street : streets) {
+		for (MapPath street : streetsCopy) {
 			drawStreet(g, map, street);
 		}
 

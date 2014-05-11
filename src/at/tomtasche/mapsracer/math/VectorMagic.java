@@ -1,4 +1,4 @@
-package at.tomtasche.mapsracer;
+package at.tomtasche.mapsracer.math;
 
 import java.util.Iterator;
 import java.util.Set;
@@ -51,13 +51,11 @@ public class VectorMagic {
 			}
 		} else if (neighbors.size() > 2) {
 			Vector2d origin = direction(from, to);
-			System.out.println(origin);
 			MapNode result = null;
 			double min = Double.MAX_VALUE;
 
 			for (MapNode neighbor : neighbors) {
 				Vector2d way = direction(to, neighbor);
-				System.out.println(way);
 				double angle = normalize(angle(origin, way));
 				double distance = distance(direction, angle);
 				if (min > distance) {

@@ -1,6 +1,7 @@
-package at.tomtasche.mapsracer;
+package at.tomtasche.mapsracer.math;
 
 import java.awt.Point;
+
 
 public class Vector2d {
     

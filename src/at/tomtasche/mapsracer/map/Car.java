@@ -1,6 +1,5 @@
-package at.tomtasche.mapsracer;
+package at.tomtasche.mapsracer.map;
 
-import at.tomtasche.mapsracer.map.MapNode;
 
 public class Car {
 

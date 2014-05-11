@@ -1,8 +1,11 @@
-package at.tomtasche.mapsracer.map;
+package at.tomtasche.mapsracer.osm;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import at.tomtasche.mapsracer.map.MapNode;
+import at.tomtasche.mapsracer.map.MapPath;
 
 public class OsmMap {
 	private int width;

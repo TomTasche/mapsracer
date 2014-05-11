@@ -7,9 +7,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import at.tomtasche.mapsracer.Cluster;
+import at.tomtasche.mapsracer.data.Cluster;
 
 public class MapPath {
+
 	private final long id;
 	private final String name;
 

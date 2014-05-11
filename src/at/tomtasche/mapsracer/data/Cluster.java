@@ -1,12 +1,21 @@
-package at.tomtasche.mapsracer;
+package at.tomtasche.mapsracer.data;
+
+import at.tomtasche.mapsracer.data.NodeManager.Direction;
+import at.tomtasche.mapsracer.map.BoundingBox;
 
 public class Cluster {
+
+	// relative cluster-coordinates (not lat/lon)
 	private final int x;
 	private final int y;
 
-	public Cluster(int x, int y) {
-		this.x = x;
-		this.y = y;
+	private BoundingBox boundingBox;
+
+	public Cluster(Direction direction, BoundingBox boundingBox) {
+		this.x = direction.getxIndex();
+		this.y = direction.getyIndex();
+
+		this.boundingBox = boundingBox;
 	}
 
 	public int getX() {
@@ -15,6 +24,10 @@ public class Cluster {
 
 	public int getY() {
 		return y;
+	}
+
+	public BoundingBox getBoundingBox() {
+		return boundingBox;
 	}
 
 	@Override

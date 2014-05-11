@@ -1,4 +1,4 @@
-package at.tomtasche.mapsracer;
+package at.tomtasche.mapsracer.osm;
 
 import java.io.File;
 import java.util.HashMap;
@@ -17,6 +17,8 @@ import org.openstreetmap.osmosis.core.task.v0_6.RunnableSource;
 import org.openstreetmap.osmosis.core.task.v0_6.Sink;
 import org.openstreetmap.osmosis.xml.common.CompressionMethod;
 import org.openstreetmap.osmosis.xml.v0_6.XmlReader;
+
+import at.tomtasche.mapsracer.ui.MapsRacer;
 
 public class OsmParser {
 
@@ -128,7 +130,7 @@ public class OsmParser {
 							links.add(toNode(wayNodes.get(i + 1)));
 						}
 					}
-				} else {
+				} else if (MapsRacer.DEBUG) {
 					System.out.println("unknown entity: " + entity.getType());
 				}
 			}
