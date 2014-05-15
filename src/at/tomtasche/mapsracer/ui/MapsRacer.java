@@ -20,6 +20,7 @@ import org.jdesktop.swingx.mapviewer.TileFactoryInfo;
 import org.jdesktop.swingx.painter.CompoundPainter;
 
 import at.tomtasche.mapsracer.data.NodeManager;
+import at.tomtasche.mapsracer.gameplay.CarEngine;
 import at.tomtasche.mapsracer.map.Car;
 import at.tomtasche.mapsracer.map.MapNode;
 
@@ -31,16 +32,20 @@ public class MapsRacer {
 
 	private static NodeManager nodeManager;
 
+	private static CarEngine engine;
+
 	private static JXMapViewer mapViewer;
 	private static CarPainter carPainter;
 	private static GraphPainter graphPainter;
 	private static ClusterPainter clusterPainter;
 
-	private static Thread thread;
+	private static Thread repaintThread;
 
 	public static void main(String[] args) throws IOException {
 		File cacheDirectory = new File("cache");
 		cacheDirectory.mkdir();
+
+		engine = new CarEngine();
 
 		nodeManager = new NodeManager(cacheDirectory);
 
@@ -87,7 +92,7 @@ public class MapsRacer {
 
 			@Override
 			public void windowClosed(WindowEvent e) {
-				thread.interrupt();
+				repaintThread.interrupt();
 
 				super.windowClosed(e);
 			}
@@ -98,12 +103,14 @@ public class MapsRacer {
 		// able to calculate cluster-sizes
 		frame.setVisible(true);
 
-		thread = new Thread() {
+		repaintThread = new Thread() {
 
 			@Override
 			public void run() {
+				engine.initialize(nodeManager.getGraph());
+
+				carPainter.initialize();
 				graphPainter.initialize(nodeManager.getStreets());
-				carPainter.initialize(nodeManager.getGraph());
 				clusterPainter.initialize(nodeManager.getClusters());
 
 				nodeManager.initialize(mapViewer);
@@ -119,6 +126,7 @@ public class MapsRacer {
 				car.setTo(end);
 				car.setDistance(0);
 
+				engine.addCar(car);
 				carPainter.addCar(car);
 
 				frame.addKeyListener(new KeyAdapter() {
@@ -149,7 +157,7 @@ public class MapsRacer {
 
 				while (true) {
 					try {
-						Thread.sleep(50);
+						Thread.sleep(100);
 					} catch (InterruptedException e1) {
 						e1.printStackTrace();
 
@@ -160,6 +168,6 @@ public class MapsRacer {
 				}
 			}
 		};
-		thread.start();
+		repaintThread.start();
 	}
 }

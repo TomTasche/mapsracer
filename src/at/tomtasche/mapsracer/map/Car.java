@@ -1,5 +1,6 @@
 package at.tomtasche.mapsracer.map;
 
+import at.tomtasche.mapsracer.math.Vector2d;
 
 public class Car {
 
@@ -8,6 +9,7 @@ public class Car {
 	private double distance;
 	private double velocity;
 	private double direction;
+	private Vector2d lastPosition;
 
 	public MapNode getFrom() {
 		return from;
@@ -47,5 +49,13 @@ public class Car {
 
 	public void setDirection(double direction) {
 		this.direction = direction;
+	}
+
+	public Vector2d getLastPosition() {
+		return lastPosition;
+	}
+
+	public void setLastPosition(Vector2d lastPosition) {
+		this.lastPosition = lastPosition;
 	}
 }
