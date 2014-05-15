@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import at.tomtasche.mapsracer.data.Cluster;
 import at.tomtasche.mapsracer.map.Car;
 import at.tomtasche.mapsracer.map.MapNode;
 import at.tomtasche.mapsracer.math.CoordinateUtil;
@@ -15,14 +16,21 @@ import at.tomtasche.mapsracer.math.VectorMagic;
 
 public class CarEngine implements Runnable {
 
-	private Map<MapNode, Set<MapNode>> graph;
+	private List<Car> cars;
 
-	private List<Car> cars = new LinkedList<>();
+	private Map<MapNode, Set<MapNode>> graph;
+	private Collection<Cluster> clusters;
 
 	private Thread engineThread;
 
-	public void initialize(Map<MapNode, Set<MapNode>> graph) {
+	public CarEngine() {
+		this.cars = new LinkedList<>();
+	}
+
+	public void initialize(Map<MapNode, Set<MapNode>> graph,
+			Collection<Cluster> clusters) {
 		this.graph = graph;
+		this.clusters = clusters;
 
 		engineThread = new Thread(this);
 		engineThread.start();
@@ -46,6 +54,7 @@ public class CarEngine implements Runnable {
 
 			lastNano = tmp;
 
+			Collection<Cluster> clustersCopy = new ArrayList<>(clusters);
 			Collection<Car> carsCopy = new ArrayList<>(cars);
 			for (Car car : carsCopy) {
 				double newDistance = car.getDistance() + car.getVelocity()
@@ -78,10 +87,19 @@ public class CarEngine implements Runnable {
 						.getyLat());
 				Vector2d direction = b.sub(a);
 				double length = CoordinateUtil.distance(direction);
+
+				// swap x and y to get lat, lon
 				Vector2d position = a.add(direction.mul(car.getDistance()
 						/ length));
 
 				car.setLastPosition(position);
+
+				for (Cluster cluster : clustersCopy) {
+					if (!CoordinateUtil.contains(cluster.getBoundingBox(),
+							position.getY(), position.getX())) {
+						// TODO: move and reload clusters
+					}
+				}
 			}
 
 			try {

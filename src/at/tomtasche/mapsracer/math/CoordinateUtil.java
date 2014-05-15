@@ -2,6 +2,8 @@ package at.tomtasche.mapsracer.math;
 
 import org.jdesktop.swingx.mapviewer.GeoPosition;
 
+import at.tomtasche.mapsracer.map.BoundingBox;
+
 public class CoordinateUtil {
 
 	private static final double EARTH_RADIUS_MILES = 3958.75;
@@ -64,5 +66,18 @@ public class CoordinateUtil {
 
 		return new GeoPosition(Math.toDegrees(latitude2),
 				Math.toDegrees(longitude2));
+	}
+
+	public static boolean contains(BoundingBox boundingBox, double lat,
+			double lon) {
+		return between(boundingBox.getTop(), boundingBox.getBottom(), lat)
+				&& between(lon, boundingBox.getLeft(), boundingBox.getRight());
+	}
+
+	private static boolean between(double a, double b, double candidate) {
+		double min = Math.min(a, b);
+		double max = Math.max(a, b);
+
+		return candidate >= min && candidate <= max;
 	}
 }

@@ -107,7 +107,8 @@ public class MapsRacer {
 
 			@Override
 			public void run() {
-				engine.initialize(nodeManager.getGraph());
+				engine.initialize(nodeManager.getGraph(),
+						nodeManager.getClusters());
 
 				carPainter.initialize();
 				graphPainter.initialize(nodeManager.getStreets());
