@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Set;
 
 import at.tomtasche.mapsracer.data.Cluster;
+import at.tomtasche.mapsracer.data.NodeManager;
+import at.tomtasche.mapsracer.data.NodeManager.Direction;
 import at.tomtasche.mapsracer.map.Car;
 import at.tomtasche.mapsracer.map.MapNode;
 import at.tomtasche.mapsracer.math.CoordinateUtil;
@@ -16,28 +18,34 @@ import at.tomtasche.mapsracer.math.VectorMagic;
 
 public class CarEngine implements Runnable {
 
-	private List<Car> cars;
+	private Car significantCar;
+	private List<Car> allCars;
 
+	private NodeManager nodeManager;
 	private Map<MapNode, Set<MapNode>> graph;
-	private Collection<Cluster> clusters;
 
 	private Thread engineThread;
 
 	public CarEngine() {
-		this.cars = new LinkedList<>();
+		this.allCars = new LinkedList<>();
 	}
 
-	public void initialize(Map<MapNode, Set<MapNode>> graph,
-			Collection<Cluster> clusters) {
-		this.graph = graph;
-		this.clusters = clusters;
+	public void initialize(NodeManager nodeManager) {
+		this.nodeManager = nodeManager;
+		this.graph = nodeManager.getGraph();
 
 		engineThread = new Thread(this);
 		engineThread.start();
 	}
 
-	public void addCar(Car car) {
-		cars.add(car);
+	public void addCar(Car car, boolean signifcant) {
+		if (significantCar != null) {
+			throw new IllegalArgumentException("significant car already set!");
+		}
+
+		allCars.add(car);
+
+		significantCar = car;
 	}
 
 	@Override
@@ -54,8 +62,7 @@ public class CarEngine implements Runnable {
 
 			lastNano = tmp;
 
-			Collection<Cluster> clustersCopy = new ArrayList<>(clusters);
-			Collection<Car> carsCopy = new ArrayList<>(cars);
+			Collection<Car> carsCopy = new ArrayList<>(allCars);
 			for (Car car : carsCopy) {
 				double newDistance = car.getDistance() + car.getVelocity()
 						* time;
@@ -93,12 +100,30 @@ public class CarEngine implements Runnable {
 						/ length));
 
 				car.setLastPosition(position);
+			}
 
-				for (Cluster cluster : clustersCopy) {
-					if (!CoordinateUtil.contains(cluster.getBoundingBox(),
-							position.getY(), position.getX())) {
-						// TODO: move and reload clusters
+			if (significantCar != null) {
+				Cluster centerCluster = nodeManager
+						.getCluster(Direction.CENTER);
+
+				if (!clusterContainsCar(centerCluster, significantCar)) {
+					Direction moveDirection = null;
+					for (Direction direction : Direction.values()) {
+						Cluster cluster = nodeManager.getCluster(direction);
+						if (clusterContainsCar(cluster, significantCar)) {
+							moveDirection = direction;
+							break;
+						}
 					}
+
+					if (moveDirection == null) {
+						throw new RuntimeException(
+								"signifcant car left all loaded clusters!");
+					}
+
+					// TODO: move and reload clusters
+					System.out.println("significant car moved to cluster "
+							+ moveDirection);
 				}
 			}
 
@@ -110,5 +135,12 @@ public class CarEngine implements Runnable {
 				break;
 			}
 		} while (true);
+	}
+
+	private boolean clusterContainsCar(Cluster cluster, Car car) {
+		Vector2d position = car.getLastPosition();
+
+		return CoordinateUtil.contains(cluster.getBoundingBox(),
+				position.getY(), position.getX());
 	}
 }

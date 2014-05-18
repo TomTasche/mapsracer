@@ -137,7 +137,12 @@ public class NodeCache {
 			Cluster[] clusterArray = clusters[i];
 
 			for (int j = 0; j < clusterArray.length; j++) {
-				clusterCollection.add(clusterArray[j]);
+				Cluster temp = clusterArray[j];
+				if (temp == null) {
+					continue;
+				}
+
+				clusterCollection.add(temp);
 			}
 		}
 	}

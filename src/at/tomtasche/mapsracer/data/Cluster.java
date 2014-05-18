@@ -1,41 +1,32 @@
 package at.tomtasche.mapsracer.data;
 
-import at.tomtasche.mapsracer.data.NodeManager.Direction;
 import at.tomtasche.mapsracer.map.BoundingBox;
 
 public class Cluster {
 
-	// relative cluster-coordinates (not lat/lon)
-	private final int x;
-	private final int y;
+	private final int id;
 
-	private BoundingBox boundingBox;
+	private final BoundingBox boundingBox;
 
-	public Cluster(Direction direction, BoundingBox boundingBox) {
-		this.x = direction.getxIndex();
-		this.y = direction.getyIndex();
-
+	public Cluster(BoundingBox boundingBox) {
 		this.boundingBox = boundingBox;
-	}
 
-	public int getX() {
-		return x;
-	}
-
-	public int getY() {
-		return y;
+		this.id = boundingBox.hashCode();
 	}
 
 	public BoundingBox getBoundingBox() {
 		return boundingBox;
 	}
 
+	public int getId() {
+		return id;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + x;
-		result = prime * result + y;
+		result = prime * result + id;
 		return result;
 	}
 
@@ -48,10 +39,13 @@ public class Cluster {
 		if (getClass() != obj.getClass())
 			return false;
 		Cluster other = (Cluster) obj;
-		if (x != other.x)
-			return false;
-		if (y != other.y)
+		if (id != other.id)
 			return false;
 		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "Cluster [id=" + id + ", boundingBox=" + boundingBox + "]";
 	}
 }

@@ -195,7 +195,7 @@ public class NodeManager {
 			boundingBox = calculateBoundingBox(centerCluster, direction);
 		}
 
-		Cluster cluster = new Cluster(direction, boundingBox);
+		Cluster cluster = new Cluster(boundingBox);
 		setCluster(direction, cluster);
 
 		try {
@@ -230,7 +230,7 @@ public class NodeManager {
 				.pixelToGeo(point, mapViewer.getZoom());
 	}
 
-	private Cluster getCluster(Direction direction) {
+	public Cluster getCluster(Direction direction) {
 		return cache.getCluster(direction.getxIndex(), direction.getyIndex());
 	}
 

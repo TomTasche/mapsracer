@@ -107,8 +107,7 @@ public class MapsRacer {
 
 			@Override
 			public void run() {
-				engine.initialize(nodeManager.getGraph(),
-						nodeManager.getClusters());
+				engine.initialize(nodeManager);
 
 				carPainter.initialize();
 				graphPainter.initialize(nodeManager.getStreets());
@@ -127,7 +126,7 @@ public class MapsRacer {
 				car.setTo(end);
 				car.setDistance(0);
 
-				engine.addCar(car);
+				engine.addCar(car, true);
 				carPainter.addCar(car);
 
 				frame.addKeyListener(new KeyAdapter() {

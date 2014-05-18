@@ -71,7 +71,7 @@ public class CoordinateUtil {
 	public static boolean contains(BoundingBox boundingBox, double lat,
 			double lon) {
 		return between(boundingBox.getTop(), boundingBox.getBottom(), lat)
-				&& between(lon, boundingBox.getLeft(), boundingBox.getRight());
+				&& between(boundingBox.getLeft(), boundingBox.getRight(), lon);
 	}
 
 	private static boolean between(double a, double b, double candidate) {
