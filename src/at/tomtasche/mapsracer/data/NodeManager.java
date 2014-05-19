@@ -57,8 +57,19 @@ public class NodeManager {
 			return;
 		}
 
-		moveCluster(Direction.CENTER, direction);
-		moveCluster(direction.getOpposite(), Direction.CENTER);
+		Cluster toCluster = getCluster(direction);
+		Cluster centerCluster = getCluster(Direction.CENTER);
+
+		setCluster(Direction.CENTER, toCluster);
+		setCluster(direction.getOpposite(), centerCluster);
+
+		for (Direction oneDirection : Direction.values()) {
+			if (oneDirection != direction.getOpposite()
+					&& oneDirection != Direction.CENTER) {
+				// delete all remaining clusters but CENTER (already set)
+				setCluster(oneDirection, null);
+			}
+		}
 
 		updateClusters();
 
@@ -239,10 +250,11 @@ public class NodeManager {
 	}
 
 	private void moveCluster(Direction fromDirection, Direction toDirection) {
-		Cluster cluster = getCluster(fromDirection);
-		setCluster(toDirection, cluster);
+		Cluster fromCluster = getCluster(fromDirection);
+		Cluster toCluster = getCluster(toDirection);
 
-		setCluster(fromDirection, null);
+		setCluster(toDirection, fromCluster);
+		setCluster(fromDirection, toCluster);
 	}
 
 	public MapPath getStreet(long id) {
@@ -262,7 +274,7 @@ public class NodeManager {
 	}
 
 	public enum Direction {
-		LEFT(0, 1), TOP(1, 0), RIGHT(2, 1), BOTTOM(1, 2), CENTER(1, 1);
+		LEFT(1, 0), TOP(0, 1), RIGHT(1, 2), BOTTOM(2, 1), CENTER(1, 1);
 
 		private final int xIndex;
 		private final int yIndex;

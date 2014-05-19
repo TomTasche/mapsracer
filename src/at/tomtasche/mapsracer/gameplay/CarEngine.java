@@ -15,6 +15,7 @@ import at.tomtasche.mapsracer.map.MapNode;
 import at.tomtasche.mapsracer.math.CoordinateUtil;
 import at.tomtasche.mapsracer.math.Vector2d;
 import at.tomtasche.mapsracer.math.VectorMagic;
+import at.tomtasche.mapsracer.ui.MapsRacer;
 
 public class CarEngine implements Runnable {
 
@@ -117,13 +118,23 @@ public class CarEngine implements Runnable {
 					}
 
 					if (moveDirection == null) {
-						throw new RuntimeException(
-								"signifcant car left all loaded clusters!");
+						String message = "signifcant car left all loaded clusters!";
+						if (MapsRacer.DEBUG) {
+							System.out.println(message);
+
+							continue;
+						} else {
+							throw new RuntimeException(message);
+						}
+					}
+
+					if (MapsRacer.DEBUG) {
+						System.out.println("significant car moved to "
+								+ moveDirection);
 					}
 
 					// TODO: move and reload clusters
-					System.out.println("significant car moved to cluster "
-							+ moveDirection);
+					nodeManager.moveClusters(moveDirection);
 				}
 			}
 
