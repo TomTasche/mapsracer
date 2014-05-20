@@ -111,7 +111,8 @@ public class CarEngine implements Runnable {
 					Direction moveDirection = null;
 					for (Direction direction : Direction.values()) {
 						Cluster cluster = nodeManager.getCluster(direction);
-						if (clusterContainsCar(cluster, significantCar)) {
+						if (cluster != null
+								&& clusterContainsCar(cluster, significantCar)) {
 							moveDirection = direction;
 							break;
 						}

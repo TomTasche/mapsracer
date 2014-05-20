@@ -19,7 +19,8 @@ import org.jdesktop.swingx.mapviewer.GeoPosition;
 import org.jdesktop.swingx.mapviewer.TileFactoryInfo;
 import org.jdesktop.swingx.painter.CompoundPainter;
 
-import at.tomtasche.mapsracer.data.NodeManager;
+import at.tomtasche.mapsracer.data.ThreadedNodeManager;
+import at.tomtasche.mapsracer.data.ThreadedNodeManager.NodeManagerListener;
 import at.tomtasche.mapsracer.gameplay.CarEngine;
 import at.tomtasche.mapsracer.map.Car;
 import at.tomtasche.mapsracer.map.MapNode;
@@ -30,7 +31,7 @@ public class MapsRacer {
 
 	private static JFrame frame;
 
-	private static NodeManager nodeManager;
+	private static ThreadedNodeManager nodeManager;
 
 	private static CarEngine engine;
 
@@ -47,7 +48,7 @@ public class MapsRacer {
 
 		engine = new CarEngine();
 
-		nodeManager = new NodeManager(cacheDirectory);
+		nodeManager = new ThreadedNodeManager(cacheDirectory);
 
 		mapViewer = new JXMapViewer();
 
@@ -103,18 +104,16 @@ public class MapsRacer {
 		// able to calculate cluster-sizes
 		frame.setVisible(true);
 
-		repaintThread = new Thread() {
+		engine.initialize(nodeManager);
+
+		carPainter.initialize();
+		graphPainter.initialize(nodeManager.getStreets());
+		clusterPainter.initialize(nodeManager.getClusters());
+
+		nodeManager.setListener(new NodeManagerListener() {
 
 			@Override
-			public void run() {
-				engine.initialize(nodeManager);
-
-				carPainter.initialize();
-				graphPainter.initialize(nodeManager.getStreets());
-				clusterPainter.initialize(nodeManager.getClusters());
-
-				nodeManager.initialize(mapViewer);
-
+			public void initialized() {
 				MapNode start = nodeManager.getStreets().iterator().next()
 						.getNodes().iterator().next();
 				MapNode end = nodeManager.getGraph().get(start).iterator()
@@ -154,12 +153,20 @@ public class MapsRacer {
 						}
 					}
 				});
+			}
+		});
 
+		nodeManager.initialize(mapViewer);
+
+		repaintThread = new Thread() {
+
+			@Override
+			public void run() {
 				while (true) {
 					try {
 						Thread.sleep(100);
-					} catch (InterruptedException e1) {
-						e1.printStackTrace();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
 
 						return;
 					}
