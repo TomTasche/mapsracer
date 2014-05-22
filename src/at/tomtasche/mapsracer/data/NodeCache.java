@@ -66,10 +66,16 @@ public class NodeCache {
 			// inspect only whole streets and continue as soon as the street
 			// contains only one node that's assigned to a currently cached
 			// cluster
+
+			Collection<MapPath> removeStreets = new LinkedList<>();
 			for (MapPath street : streets.values()) {
 				if (!isActive(street)) {
-					streets.remove(street.getId());
+					removeStreets.add(street);
 				}
+			}
+
+			for (MapPath removeStreet : removeStreets) {
+				streets.remove(removeStreet.getId());
 			}
 		} else {
 			// inspect EACH node and check its clusterId
@@ -114,7 +120,8 @@ public class NodeCache {
 	private boolean clustersContain(Cluster cluster) {
 		for (int i = 0; i < clusters.length; i++) {
 			for (int j = 0; j < clusters.length; j++) {
-				if (clusters[i][j].equals(cluster)) {
+				Cluster tempCluster = clusters[i][j];
+				if (tempCluster != null && tempCluster.equals(cluster)) {
 					return true;
 				}
 			}
@@ -137,7 +144,12 @@ public class NodeCache {
 			Cluster[] clusterArray = clusters[i];
 
 			for (int j = 0; j < clusterArray.length; j++) {
-				clusterCollection.add(clusterArray[j]);
+				Cluster temp = clusterArray[j];
+				if (temp == null) {
+					continue;
+				}
+
+				clusterCollection.add(temp);
 			}
 		}
 	}

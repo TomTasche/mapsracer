@@ -1,6 +1,11 @@
 package at.tomtasche.mapsracer.math;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import org.jdesktop.swingx.mapviewer.GeoPosition;
+
+import at.tomtasche.mapsracer.map.BoundingBox;
 
 public class CoordinateUtil {
 
@@ -64,5 +69,56 @@ public class CoordinateUtil {
 
 		return new GeoPosition(Math.toDegrees(latitude2),
 				Math.toDegrees(longitude2));
+	}
+
+	public static boolean contains(BoundingBox boundingBox, double lat,
+			double lon) {
+		return between(boundingBox.getTop(), boundingBox.getBottom(), lat)
+				&& between(boundingBox.getLeft(), boundingBox.getRight(), lon);
+	}
+
+	private static boolean between(double a, double b, double candidate) {
+		double min = Math.min(a, b);
+		double max = Math.max(a, b);
+
+		return candidate >= min && candidate <= max;
+	}
+
+	public static GeoPosition calculateMiddle(BoundingBox boundingBox) {
+		List<GeoPosition> coordinateList = new LinkedList<>();
+		coordinateList.add(boundingBox.getTopLeft());
+		coordinateList.add(boundingBox.getBottomLeft());
+		coordinateList.add(boundingBox.getBottomRight());
+		coordinateList.add(boundingBox.getTopRight());
+
+		double middleX = 0;
+		double middleY = 0;
+		double middleZ = 0;
+
+		for (GeoPosition coordinate : coordinateList) {
+			double lat = Math.toRadians(coordinate.getLatitude());
+			double lon = Math.toRadians(coordinate.getLongitude());
+
+			double x = Math.cos(lat) * Math.cos(lon);
+			double y = Math.cos(lat) * Math.sin(lon);
+			double z = Math.sin(lat);
+
+			middleX += x;
+			middleY += y;
+			middleZ += z;
+		}
+
+		int total = coordinateList.size();
+
+		middleX = middleX / total;
+		middleY = middleY / total;
+		middleZ = middleZ / total;
+
+		double centerLon = Math.atan2(middleY, middleX);
+		double centerHyp = Math.sqrt(middleX * middleX + middleY * middleY);
+		double centerLat = Math.atan2(middleZ, centerHyp);
+
+		return new GeoPosition(Math.toDegrees(centerLat),
+				Math.toDegrees(centerLon));
 	}
 }

@@ -19,8 +19,11 @@ import org.jdesktop.swingx.mapviewer.GeoPosition;
 import org.jdesktop.swingx.mapviewer.TileFactoryInfo;
 import org.jdesktop.swingx.painter.CompoundPainter;
 
-import at.tomtasche.mapsracer.data.NodeManager;
+import at.tomtasche.mapsracer.data.ThreadedNodeManager;
+import at.tomtasche.mapsracer.data.ThreadedNodeManager.NodeManagerListener;
+import at.tomtasche.mapsracer.gameplay.CarEngine;
 import at.tomtasche.mapsracer.map.Car;
+import at.tomtasche.mapsracer.map.MapManager;
 import at.tomtasche.mapsracer.map.MapNode;
 
 public class MapsRacer {
@@ -29,20 +32,28 @@ public class MapsRacer {
 
 	private static JFrame frame;
 
-	private static NodeManager nodeManager;
+	private static ThreadedNodeManager nodeManager;
+
+	private static MapManager mapManager;
+
+	private static CarEngine engine;
 
 	private static JXMapViewer mapViewer;
 	private static CarPainter carPainter;
 	private static GraphPainter graphPainter;
 	private static ClusterPainter clusterPainter;
 
-	private static Thread thread;
+	private static Thread repaintThread;
 
 	public static void main(String[] args) throws IOException {
 		File cacheDirectory = new File("cache");
 		cacheDirectory.mkdir();
 
-		nodeManager = new NodeManager(cacheDirectory);
+		engine = new CarEngine();
+
+		nodeManager = new ThreadedNodeManager(cacheDirectory);
+
+		mapManager = new MapManager();
 
 		mapViewer = new JXMapViewer();
 
@@ -87,7 +98,7 @@ public class MapsRacer {
 
 			@Override
 			public void windowClosed(WindowEvent e) {
-				thread.interrupt();
+				repaintThread.interrupt();
 
 				super.windowClosed(e);
 			}
@@ -98,16 +109,18 @@ public class MapsRacer {
 		// able to calculate cluster-sizes
 		frame.setVisible(true);
 
-		thread = new Thread() {
+		mapManager.initialize(mapViewer, nodeManager);
+
+		engine.initialize(nodeManager, mapManager);
+
+		carPainter.initialize();
+		graphPainter.initialize(nodeManager.getStreets());
+		clusterPainter.initialize(nodeManager.getClusters());
+
+		nodeManager.setListener(new NodeManagerListener() {
 
 			@Override
-			public void run() {
-				graphPainter.initialize(nodeManager.getStreets());
-				carPainter.initialize(nodeManager.getGraph());
-				clusterPainter.initialize(nodeManager.getClusters());
-
-				nodeManager.initialize(mapViewer);
-
+			public void initialized() {
 				MapNode start = nodeManager.getStreets().iterator().next()
 						.getNodes().iterator().next();
 				MapNode end = nodeManager.getGraph().get(start).iterator()
@@ -119,6 +132,7 @@ public class MapsRacer {
 				car.setTo(end);
 				car.setDistance(0);
 
+				engine.addCar(car, true);
 				carPainter.addCar(car);
 
 				frame.addKeyListener(new KeyAdapter() {
@@ -146,12 +160,20 @@ public class MapsRacer {
 						}
 					}
 				});
+			}
+		});
 
+		nodeManager.initialize(mapManager);
+
+		repaintThread = new Thread() {
+
+			@Override
+			public void run() {
 				while (true) {
 					try {
-						Thread.sleep(50);
-					} catch (InterruptedException e1) {
-						e1.printStackTrace();
+						Thread.sleep(100);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
 
 						return;
 					}
@@ -160,6 +182,6 @@ public class MapsRacer {
 				}
 			}
 		};
-		thread.start();
+		repaintThread.start();
 	}
 }
