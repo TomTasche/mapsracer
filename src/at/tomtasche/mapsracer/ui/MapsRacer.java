@@ -23,6 +23,7 @@ import at.tomtasche.mapsracer.data.ThreadedNodeManager;
 import at.tomtasche.mapsracer.data.ThreadedNodeManager.NodeManagerListener;
 import at.tomtasche.mapsracer.gameplay.CarEngine;
 import at.tomtasche.mapsracer.map.Car;
+import at.tomtasche.mapsracer.map.MapManager;
 import at.tomtasche.mapsracer.map.MapNode;
 
 public class MapsRacer {
@@ -32,6 +33,8 @@ public class MapsRacer {
 	private static JFrame frame;
 
 	private static ThreadedNodeManager nodeManager;
+
+	private static MapManager mapManager;
 
 	private static CarEngine engine;
 
@@ -49,6 +52,8 @@ public class MapsRacer {
 		engine = new CarEngine();
 
 		nodeManager = new ThreadedNodeManager(cacheDirectory);
+
+		mapManager = new MapManager();
 
 		mapViewer = new JXMapViewer();
 
@@ -104,7 +109,9 @@ public class MapsRacer {
 		// able to calculate cluster-sizes
 		frame.setVisible(true);
 
-		engine.initialize(nodeManager);
+		mapManager.initialize(mapViewer, nodeManager);
+
+		engine.initialize(nodeManager, mapManager);
 
 		carPainter.initialize();
 		graphPainter.initialize(nodeManager.getStreets());
@@ -156,7 +163,7 @@ public class MapsRacer {
 			}
 		});
 
-		nodeManager.initialize(mapViewer);
+		nodeManager.initialize(mapManager);
 
 		repaintThread = new Thread() {
 

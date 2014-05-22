@@ -7,10 +7,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.jdesktop.swingx.mapviewer.GeoPosition;
+
 import at.tomtasche.mapsracer.data.Cluster;
 import at.tomtasche.mapsracer.data.NodeManager;
 import at.tomtasche.mapsracer.data.NodeManager.Direction;
 import at.tomtasche.mapsracer.map.Car;
+import at.tomtasche.mapsracer.map.MapManager;
 import at.tomtasche.mapsracer.map.MapNode;
 import at.tomtasche.mapsracer.math.CoordinateUtil;
 import at.tomtasche.mapsracer.math.Vector2d;
@@ -25,14 +28,18 @@ public class CarEngine implements Runnable {
 	private NodeManager nodeManager;
 	private Map<MapNode, Set<MapNode>> graph;
 
+	private MapManager mapManager;
+
 	private Thread engineThread;
 
 	public CarEngine() {
 		this.allCars = new LinkedList<>();
 	}
 
-	public void initialize(NodeManager nodeManager) {
+	public void initialize(NodeManager nodeManager, MapManager mapManager) {
 		this.nodeManager = nodeManager;
+		this.mapManager = mapManager;
+
 		this.graph = nodeManager.getGraph();
 
 		engineThread = new Thread(this);
@@ -134,7 +141,8 @@ public class CarEngine implements Runnable {
 								+ moveDirection);
 					}
 
-					// TODO: move and reload clusters
+					mapManager.moveViewport(moveDirection);
+
 					nodeManager.moveClusters(moveDirection);
 				}
 			}

@@ -4,14 +4,13 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
-import org.jdesktop.swingx.JXMapViewer;
-
+import at.tomtasche.mapsracer.map.MapManager;
 import at.tomtasche.mapsracer.map.MapNode;
 import at.tomtasche.mapsracer.map.MapPath;
 
 public interface NodeManager {
 
-	public void initialize(JXMapViewer mapViewer);
+	public void initialize(MapManager mapManager);
 
 	public void moveClusters(Direction direction);
 

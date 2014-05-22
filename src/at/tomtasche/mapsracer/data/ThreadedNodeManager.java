@@ -8,8 +8,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.jdesktop.swingx.JXMapViewer;
-
+import at.tomtasche.mapsracer.map.MapManager;
 import at.tomtasche.mapsracer.map.MapNode;
 import at.tomtasche.mapsracer.map.MapPath;
 
@@ -30,14 +29,14 @@ public class ThreadedNodeManager implements NodeManager {
 	}
 
 	@Override
-	public void initialize(final JXMapViewer mapViewer) {
+	public void initialize(final MapManager mapManager) {
 		threadExecutor = Executors.newFixedThreadPool(5);
 
 		threadExecutor.execute(new Runnable() {
 
 			@Override
 			public void run() {
-				nodeManager.initialize(mapViewer);
+				nodeManager.initialize(mapManager);
 
 				listener.initialized();
 			}

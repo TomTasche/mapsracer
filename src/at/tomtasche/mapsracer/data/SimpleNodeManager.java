@@ -10,10 +10,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.jdesktop.swingx.JXMapViewer;
 import org.jdesktop.swingx.mapviewer.GeoPosition;
 
 import at.tomtasche.mapsracer.map.BoundingBox;
+import at.tomtasche.mapsracer.map.MapManager;
 import at.tomtasche.mapsracer.map.MapNode;
 import at.tomtasche.mapsracer.map.MapPath;
 import at.tomtasche.mapsracer.math.CoordinateUtil;
@@ -29,23 +29,16 @@ public class SimpleNodeManager implements NodeManager {
 
 	private boolean initialized;
 
-	// TODO: remove this direct dependency on UI (only needed for getting
-	// map-dimensions and viewport
-	private JXMapViewer mapViewer;
+	private MapManager mapManager;
 
 	public SimpleNodeManager(File cacheDirectory) throws IOException {
 		this.fetcher = new NodeFetcher(cacheDirectory);
 		this.cache = new NodeCache();
 	}
 
-	/**
-	 * @param mapViewer
-	 *            has to be fully initialized at the time of calling this
-	 *            method. Especially getViewportBounds has to return sane data
-	 */
 	@Override
-	public void initialize(JXMapViewer mapViewer) {
-		this.mapViewer = mapViewer;
+	public void initialize(MapManager mapManager) {
+		this.mapManager = mapManager;
 
 		fetchCluster(Direction.CENTER);
 
@@ -89,11 +82,12 @@ public class SimpleNodeManager implements NodeManager {
 	private BoundingBox toBoundingBox(Rectangle viewportBounds) {
 		Point2D topLeftPoint = new Point2D.Double(viewportBounds.getMinX(),
 				viewportBounds.getMinY());
-		GeoPosition topLeftPosition = pixelToGeo(topLeftPoint);
+		GeoPosition topLeftPosition = mapManager.pixelToGeo(topLeftPoint);
 
 		Point2D bottomRightPoint = new Point2D.Double(viewportBounds.getMaxX(),
 				viewportBounds.getMaxY());
-		GeoPosition bottomRightPosition = pixelToGeo(bottomRightPoint);
+		GeoPosition bottomRightPosition = mapManager
+				.pixelToGeo(bottomRightPoint);
 
 		return boundingBoxFromGeoPositions(topLeftPosition, bottomRightPosition);
 	}
@@ -200,7 +194,7 @@ public class SimpleNodeManager implements NodeManager {
 			}
 			initialized = true;
 
-			boundingBox = toBoundingBox(mapViewer.getViewportBounds());
+			boundingBox = toBoundingBox(mapManager.getViewport());
 		} else {
 			// there is always a cluster in the center after initialization!
 			Cluster centerCluster = getCluster(Direction.CENTER);
@@ -231,16 +225,6 @@ public class SimpleNodeManager implements NodeManager {
 		if (MapsRacer.DEBUG) {
 			System.out.println("finished loading " + direction);
 		}
-	}
-
-	private Point2D geoToPixel(GeoPosition position) {
-		return mapViewer.getTileFactory().geoToPixel(position,
-				mapViewer.getZoom());
-	}
-
-	private GeoPosition pixelToGeo(Point2D point) {
-		return mapViewer.getTileFactory()
-				.pixelToGeo(point, mapViewer.getZoom());
 	}
 
 	@Override
