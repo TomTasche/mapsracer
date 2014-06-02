@@ -12,7 +12,6 @@ import java.util.List;
 
 import at.tomtasche.mapsracer.map.BoundingBox;
 import at.tomtasche.mapsracer.map.MapPath;
-import at.tomtasche.mapsracer.osm.OsmMap;
 
 public class NodeFetcher {
 
@@ -78,7 +77,7 @@ public class NodeFetcher {
 		}
 	}
 
-	private OsmMap parseBoundingBox(File cacheFile, Cluster cluster)
+	private List<MapPath> parseBoundingBox(File cacheFile, Cluster cluster)
 			throws IOException {
 		FileInputStream inputStream = null;
 		try {
@@ -95,10 +94,10 @@ public class NodeFetcher {
 	protected List<MapPath> getBoundingBox(BoundingBox boundingBox,
 			Cluster cluster) throws IOException {
 		File cacheFile = fetchBoundingBox(boundingBox);
-		OsmMap map = parseBoundingBox(cacheFile, cluster);
+		List<MapPath> streets = parseBoundingBox(cacheFile, cluster);
 
 		cacheFile.delete();
 
-		return map.getStreets();
+		return streets;
 	}
 }

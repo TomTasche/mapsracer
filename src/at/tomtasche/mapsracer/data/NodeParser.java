@@ -15,12 +15,11 @@ import at.stefl.commons.lwxml.reader.LWXMLReader;
 import at.stefl.commons.lwxml.reader.LWXMLStreamReader;
 import at.tomtasche.mapsracer.map.MapNode;
 import at.tomtasche.mapsracer.map.MapPath;
-import at.tomtasche.mapsracer.osm.OsmMap;
 import at.tomtasche.mapsracer.ui.MapsRacer;
 
 public class NodeParser {
 
-	public OsmMap parse(InputStream inputStream, Cluster cluster)
+	public List<MapPath> parse(InputStream inputStream, Cluster cluster)
 			throws IOException {
 		LWXMLReader lwxmlReader = new LWXMLStreamReader(
 				new FluidInputStreamReader(inputStream));
@@ -101,43 +100,13 @@ public class NodeParser {
 			event = lwxmlReader.readEvent();
 		}
 
-		Map<MapNode, Set<MapNode>> neighborMap = generateNeighborMap(nodes,
-				ways);
-
 		if (MapsRacer.DEBUG) {
-			System.out.println(nodes.size());
-			System.out.println(ways.size());
-			System.out.println(neighborMap.size());
+			System.out.println(nodes.size() + " nodes");
+			System.out.println(ways.size() + " ways");
 		}
 
 		lwxmlReader.close();
 
-		return new OsmMap(ways, neighborMap);
-	}
-
-	private Map<MapNode, Set<MapNode>> generateNeighborMap(
-			Map<Long, MapNode> nodes, List<MapPath> ways) {
-		Map<MapNode, Set<MapNode>> neighborMap = new HashMap<MapNode, Set<MapNode>>();
-		for (MapPath way : ways) {
-			MapNode lastNode = null;
-			for (MapNode mapNode : way.getNodes()) {
-				Set<MapNode> links = neighborMap.get(mapNode);
-				if (links == null) {
-					links = new HashSet<>();
-					neighborMap.put(mapNode, links);
-				}
-
-				if (lastNode != null) {
-					// add left
-					links.add(lastNode);
-					// add right
-					neighborMap.get(lastNode).add(mapNode);
-				}
-
-				lastNode = mapNode;
-			}
-		}
-
-		return neighborMap;
+		return ways;
 	}
 }
