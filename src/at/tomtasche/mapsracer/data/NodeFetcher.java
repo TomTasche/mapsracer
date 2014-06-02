@@ -1,6 +1,7 @@
 package at.tomtasche.mapsracer.data;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
@@ -10,10 +11,8 @@ import java.nio.file.StandardCopyOption;
 import java.util.List;
 
 import at.tomtasche.mapsracer.map.BoundingBox;
-import at.tomtasche.mapsracer.map.MapConverter;
 import at.tomtasche.mapsracer.map.MapPath;
 import at.tomtasche.mapsracer.osm.OsmMap;
-import at.tomtasche.mapsracer.osm.OsmParser;
 
 public class NodeFetcher {
 
@@ -35,18 +34,23 @@ public class NodeFetcher {
 
 	private File cacheDirectory;
 
+	private NodeParser nodeParser;
+
 	public NodeFetcher(File cacheDirectory) throws IOException {
 		this.cacheDirectory = cacheDirectory;
 		if (!cacheDirectory.exists()) {
 			throw new IOException("cache does not exist: "
 					+ cacheDirectory.getAbsolutePath());
 		}
+
+		nodeParser = new NodeParser();
 	}
 
 	private File fetchBoundingBox(BoundingBox boundingBox) throws IOException {
 		String url = API_BASE_URL + "/interpreter";
-		
-		HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+
+		HttpURLConnection connection = (HttpURLConnection) new URL(url)
+				.openConnection();
 
 		String query = String.format(QUERY_FORMAT, boundingBox.getBottom(),
 				boundingBox.getLeft(), boundingBox.getTop(),
@@ -54,7 +58,7 @@ public class NodeFetcher {
 
 		try {
 			connection.setDoOutput(true);
-			
+
 			OutputStreamWriter writer = new OutputStreamWriter(
 					connection.getOutputStream());
 			writer.write(query);
@@ -74,12 +78,18 @@ public class NodeFetcher {
 		}
 	}
 
-	private OsmMap parseBoundingBox(File cacheFile, Cluster cluster) {
-		// http://www.openstreetmap.org/export
-		final OsmParser parser = new OsmParser(cacheFile);
-		parser.initialize();
+	private OsmMap parseBoundingBox(File cacheFile, Cluster cluster)
+			throws IOException {
+		FileInputStream inputStream = null;
+		try {
+			inputStream = new FileInputStream(cacheFile);
 
-		return MapConverter.convert(parser, cluster);
+			return nodeParser.parse(inputStream, cluster);
+		} finally {
+			if (inputStream != null) {
+				inputStream.close();
+			}
+		}
 	}
 
 	protected List<MapPath> getBoundingBox(BoundingBox boundingBox,
