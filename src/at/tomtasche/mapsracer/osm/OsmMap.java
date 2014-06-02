@@ -8,16 +8,11 @@ import at.tomtasche.mapsracer.map.MapNode;
 import at.tomtasche.mapsracer.map.MapPath;
 
 public class OsmMap {
-	private int width;
-	private int height;
 
 	private final List<MapPath> streets;
 	private final Map<MapNode, Set<MapNode>> neighborMap;
 
-	public OsmMap(int width, int height, List<MapPath> streets,
-			Map<MapNode, Set<MapNode>> streetGraph) {
-		this.width = width;
-		this.height = height;
+	public OsmMap(List<MapPath> streets, Map<MapNode, Set<MapNode>> streetGraph) {
 		this.streets = streets;
 		this.neighborMap = streetGraph;
 	}
@@ -28,13 +23,5 @@ public class OsmMap {
 
 	public List<MapPath> getStreets() {
 		return streets;
-	}
-
-	public int getWidth() {
-		return width;
-	}
-
-	public int getHeight() {
-		return height;
 	}
 }

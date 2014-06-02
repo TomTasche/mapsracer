@@ -28,6 +28,8 @@ import at.tomtasche.mapsracer.map.MapNode;
 
 public class MapsRacer {
 
+	private static final int CAR_VELOCITY = 100;
+
 	public static final boolean DEBUG = true;
 
 	private static JFrame frame;
@@ -44,6 +46,8 @@ public class MapsRacer {
 	private static ClusterPainter clusterPainter;
 
 	private static Thread repaintThread;
+
+	private static Car car;
 
 	public static void main(String[] args) throws IOException {
 		File cacheDirectory = new File("cache");
@@ -117,6 +121,8 @@ public class MapsRacer {
 		graphPainter.initialize(nodeManager.getStreets());
 		clusterPainter.initialize(nodeManager.getClusters());
 
+		car = new Car();
+
 		nodeManager.setListener(new NodeManagerListener() {
 
 			@Override
@@ -126,40 +132,13 @@ public class MapsRacer {
 				MapNode end = nodeManager.getGraph().get(start).iterator()
 						.next();
 
-				final Car car = new Car();
-				car.setVelocity(100);
+				car.setVelocity(CAR_VELOCITY);
 				car.setFrom(start);
 				car.setTo(end);
 				car.setDistance(0);
 
 				engine.addCar(car, true);
 				carPainter.addCar(car);
-
-				frame.addKeyListener(new KeyAdapter() {
-					@Override
-					public void keyPressed(KeyEvent e) {
-						switch (e.getKeyCode()) {
-						case KeyEvent.VK_LEFT:
-							car.setDirection(-Math.PI / 2);
-							break;
-						case KeyEvent.VK_RIGHT:
-							car.setDirection(Math.PI / 2);
-							break;
-						case KeyEvent.VK_ENTER:
-							frame.repaint();
-							break;
-						}
-					}
-
-					public void keyReleased(KeyEvent e) {
-						switch (e.getKeyCode()) {
-						case KeyEvent.VK_LEFT:
-						case KeyEvent.VK_RIGHT:
-							car.setDirection(0);
-							break;
-						}
-					}
-				});
 			}
 		});
 
@@ -183,5 +162,38 @@ public class MapsRacer {
 			}
 		};
 		repaintThread.start();
+
+		mapViewer.setFocusable(true);
+		mapViewer.requestFocusInWindow();
+		mapViewer.addKeyListener(new KeyAdapter() {
+
+			@Override
+			public void keyPressed(KeyEvent e) {
+				switch (e.getKeyCode()) {
+				case KeyEvent.VK_LEFT:
+					car.setDirection(Math.PI / 2);
+					break;
+				case KeyEvent.VK_RIGHT:
+					car.setDirection(-Math.PI / 2);
+					break;
+				case KeyEvent.VK_DOWN:
+					car.setVelocity(0);
+					break;
+				}
+			}
+
+			@Override
+			public void keyReleased(KeyEvent e) {
+				switch (e.getKeyCode()) {
+				case KeyEvent.VK_LEFT:
+				case KeyEvent.VK_RIGHT:
+					car.setDirection(0);
+					break;
+				case KeyEvent.VK_DOWN:
+					car.setVelocity(CAR_VELOCITY);
+					break;
+				}
+			}
+		});
 	}
 }

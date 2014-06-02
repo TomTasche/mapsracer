@@ -1,7 +1,9 @@
 package at.tomtasche.mapsracer.data;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Files;
@@ -9,16 +11,30 @@ import java.nio.file.StandardCopyOption;
 import java.util.List;
 
 import at.tomtasche.mapsracer.map.BoundingBox;
-import at.tomtasche.mapsracer.map.MapConverter;
 import at.tomtasche.mapsracer.map.MapPath;
 import at.tomtasche.mapsracer.osm.OsmMap;
-import at.tomtasche.mapsracer.osm.OsmParser;
 
 public class NodeFetcher {
 
-	private static final String API_BASE_URL = "http://www.overpass-api.de";
+	private static final String QUERY_FORMAT = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+			+ "<osm-script>"
+			+ "<query type=\"way\">"
+			+ "<has-kv k=\"highway\" />"
+			+ "<bbox-query s=\"%f\" w=\"%f\" n=\"%f\" e=\"%f\"/>"
+			+ "</query>"
+			+ "<union>"
+			+ "<item/>"
+			+ "<recurse type=\"down\"/>"
+			+ "</union>"
+			+ "<print mode=\"skeleton\"/>"
+			+ "<print order=\"quadtile\"/>"
+			+ "<print/>" + "</osm-script>";
+
+	private static final String API_BASE_URL = "http://www.overpass-api.de/api";
 
 	private File cacheDirectory;
+
+	private NodeParser nodeParser;
 
 	public NodeFetcher(File cacheDirectory) throws IOException {
 		this.cacheDirectory = cacheDirectory;
@@ -26,39 +42,28 @@ public class NodeFetcher {
 			throw new IOException("cache does not exist: "
 					+ cacheDirectory.getAbsolutePath());
 		}
-	}
 
-	/**
-	 * http://wiki.openstreetmap.org/wiki/API_v0.6#
-	 * Retrieving_map_data_by_bounding_box:_GET_.2Fapi.2F0.6.2Fmap
-	 * 
-	 * http://wiki.openstreetmap.org/wiki/XAPI#Overpass_API
-	 * 
-	 * @param left
-	 * @param top
-	 * @param right
-	 * @param bottom
-	 * 
-	 * @return
-	 * @throws IOException
-	 */
-	private URL buildUrl(BoundingBox boundingBox) throws IOException {
-		String url = API_BASE_URL;
-		url += "/api/xapi_meta?*[bbox=";
-		url += boundingBox.getLeft() + ",";
-		url += boundingBox.getBottom() + ",";
-		url += boundingBox.getRight() + ",";
-		url += boundingBox.getTop();
-		url += "]";
-
-		return new URL(url);
+		nodeParser = new NodeParser();
 	}
 
 	private File fetchBoundingBox(BoundingBox boundingBox) throws IOException {
-		HttpURLConnection connection = (HttpURLConnection) buildUrl(boundingBox)
+		String url = API_BASE_URL + "/interpreter";
+
+		HttpURLConnection connection = (HttpURLConnection) new URL(url)
 				.openConnection();
 
+		String query = String.format(QUERY_FORMAT, boundingBox.getBottom(),
+				boundingBox.getLeft(), boundingBox.getTop(),
+				boundingBox.getRight());
+
 		try {
+			connection.setDoOutput(true);
+
+			OutputStreamWriter writer = new OutputStreamWriter(
+					connection.getOutputStream());
+			writer.write(query);
+			writer.flush();
+
 			File cacheFile = new File(cacheDirectory, "mapsracer-"
 					+ System.currentTimeMillis() + ".xml");
 			long writtenBytes = Files.copy(connection.getInputStream(),
@@ -73,12 +78,18 @@ public class NodeFetcher {
 		}
 	}
 
-	private OsmMap parseBoundingBox(File cacheFile, Cluster cluster) {
-		// http://www.openstreetmap.org/export
-		final OsmParser parser = new OsmParser(cacheFile);
-		parser.initialize();
+	private OsmMap parseBoundingBox(File cacheFile, Cluster cluster)
+			throws IOException {
+		FileInputStream inputStream = null;
+		try {
+			inputStream = new FileInputStream(cacheFile);
 
-		return MapConverter.convert(parser, cluster);
+			return nodeParser.parse(inputStream, cluster);
+		} finally {
+			if (inputStream != null) {
+				inputStream.close();
+			}
+		}
 	}
 
 	protected List<MapPath> getBoundingBox(BoundingBox boundingBox,
