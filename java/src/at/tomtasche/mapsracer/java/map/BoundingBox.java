@@ -1,8 +1,8 @@
-package at.tomtasche.mapsracer.map;
+package at.tomtasche.mapsracer.java.map;
 
 import org.jdesktop.swingx.mapviewer.GeoPosition;
 
-import at.tomtasche.mapsracer.math.CoordinateUtil;
+import at.tomtasche.mapsracer.java.math.CoordinateUtil;
 
 public class BoundingBox {
 

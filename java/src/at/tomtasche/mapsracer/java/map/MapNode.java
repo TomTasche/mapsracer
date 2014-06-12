@@ -1,6 +1,6 @@
-package at.tomtasche.mapsracer.map;
+package at.tomtasche.mapsracer.java.map;
 
-import at.tomtasche.mapsracer.data.Cluster;
+import at.tomtasche.mapsracer.java.data.Cluster;
 
 public class MapNode {
 

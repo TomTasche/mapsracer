@@ -1,4 +1,4 @@
-package at.tomtasche.mapsracer.gameplay;
+package at.tomtasche.mapsracer.java.gameplay;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -9,16 +9,16 @@ import java.util.Set;
 
 import org.jdesktop.swingx.mapviewer.GeoPosition;
 
-import at.tomtasche.mapsracer.data.Cluster;
-import at.tomtasche.mapsracer.data.NodeManager;
-import at.tomtasche.mapsracer.data.NodeManager.Direction;
-import at.tomtasche.mapsracer.map.Car;
-import at.tomtasche.mapsracer.map.MapManager;
-import at.tomtasche.mapsracer.map.MapNode;
-import at.tomtasche.mapsracer.math.CoordinateUtil;
-import at.tomtasche.mapsracer.math.Vector2d;
-import at.tomtasche.mapsracer.math.VectorMagic;
-import at.tomtasche.mapsracer.ui.MapsRacer;
+import at.tomtasche.mapsracer.java.data.Cluster;
+import at.tomtasche.mapsracer.java.data.NodeManager;
+import at.tomtasche.mapsracer.java.data.NodeManager.Direction;
+import at.tomtasche.mapsracer.java.map.Car;
+import at.tomtasche.mapsracer.java.map.MapManager;
+import at.tomtasche.mapsracer.java.map.MapNode;
+import at.tomtasche.mapsracer.java.math.CoordinateUtil;
+import at.tomtasche.mapsracer.java.math.Vector2d;
+import at.tomtasche.mapsracer.java.math.VectorMagic;
+import at.tomtasche.mapsracer.java.ui.MapsRacer;
 
 public class CarEngine implements Runnable {
 

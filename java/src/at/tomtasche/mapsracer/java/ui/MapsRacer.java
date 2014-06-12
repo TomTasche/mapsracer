@@ -1,4 +1,4 @@
-package at.tomtasche.mapsracer.ui;
+package at.tomtasche.mapsracer.java.ui;
 
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -19,12 +19,12 @@ import org.jdesktop.swingx.mapviewer.GeoPosition;
 import org.jdesktop.swingx.mapviewer.TileFactoryInfo;
 import org.jdesktop.swingx.painter.CompoundPainter;
 
-import at.tomtasche.mapsracer.data.ThreadedNodeManager;
-import at.tomtasche.mapsracer.data.ThreadedNodeManager.NodeManagerListener;
-import at.tomtasche.mapsracer.gameplay.CarEngine;
-import at.tomtasche.mapsracer.map.Car;
-import at.tomtasche.mapsracer.map.MapManager;
-import at.tomtasche.mapsracer.map.MapNode;
+import at.tomtasche.mapsracer.java.data.ThreadedNodeManager;
+import at.tomtasche.mapsracer.java.data.ThreadedNodeManager.NodeManagerListener;
+import at.tomtasche.mapsracer.java.gameplay.CarEngine;
+import at.tomtasche.mapsracer.java.map.Car;
+import at.tomtasche.mapsracer.java.map.MapManager;
+import at.tomtasche.mapsracer.java.map.MapNode;
 
 public class MapsRacer {
 

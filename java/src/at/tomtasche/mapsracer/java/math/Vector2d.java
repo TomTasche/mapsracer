@@ -1,4 +1,4 @@
-package at.tomtasche.mapsracer.math;
+package at.tomtasche.mapsracer.java.math;
 
 import java.awt.Point;
 

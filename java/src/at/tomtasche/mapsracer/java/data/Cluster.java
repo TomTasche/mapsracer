@@ -1,6 +1,6 @@
-package at.tomtasche.mapsracer.data;
+package at.tomtasche.mapsracer.java.data;
 
-import at.tomtasche.mapsracer.map.BoundingBox;
+import at.tomtasche.mapsracer.java.map.BoundingBox;
 
 public class Cluster {
 

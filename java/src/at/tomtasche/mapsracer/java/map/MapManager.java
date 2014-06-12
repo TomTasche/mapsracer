@@ -1,4 +1,4 @@
-package at.tomtasche.mapsracer.map;
+package at.tomtasche.mapsracer.java.map;
 
 import java.awt.Rectangle;
 import java.awt.geom.Point2D;
@@ -6,10 +6,10 @@ import java.awt.geom.Point2D;
 import org.jdesktop.swingx.JXMapViewer;
 import org.jdesktop.swingx.mapviewer.GeoPosition;
 
-import at.tomtasche.mapsracer.data.Cluster;
-import at.tomtasche.mapsracer.data.NodeManager;
-import at.tomtasche.mapsracer.data.NodeManager.Direction;
-import at.tomtasche.mapsracer.math.CoordinateUtil;
+import at.tomtasche.mapsracer.java.data.Cluster;
+import at.tomtasche.mapsracer.java.data.NodeManager;
+import at.tomtasche.mapsracer.java.data.NodeManager.Direction;
+import at.tomtasche.mapsracer.java.math.CoordinateUtil;
 
 public class MapManager {
 

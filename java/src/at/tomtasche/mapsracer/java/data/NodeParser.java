@@ -1,4 +1,4 @@
-package at.tomtasche.mapsracer.data;
+package at.tomtasche.mapsracer.java.data;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,9 +13,9 @@ import at.stefl.commons.io.FluidInputStreamReader;
 import at.stefl.commons.lwxml.LWXMLEvent;
 import at.stefl.commons.lwxml.reader.LWXMLReader;
 import at.stefl.commons.lwxml.reader.LWXMLStreamReader;
-import at.tomtasche.mapsracer.map.MapNode;
-import at.tomtasche.mapsracer.map.MapPath;
-import at.tomtasche.mapsracer.ui.MapsRacer;
+import at.tomtasche.mapsracer.java.map.MapNode;
+import at.tomtasche.mapsracer.java.map.MapPath;
+import at.tomtasche.mapsracer.java.ui.MapsRacer;
 
 public class NodeParser {
 

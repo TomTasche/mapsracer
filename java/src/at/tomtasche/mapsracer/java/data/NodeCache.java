@@ -1,4 +1,4 @@
-package at.tomtasche.mapsracer.data;
+package at.tomtasche.mapsracer.java.data;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import at.tomtasche.mapsracer.map.MapNode;
-import at.tomtasche.mapsracer.map.MapPath;
+import at.tomtasche.mapsracer.java.map.MapNode;
+import at.tomtasche.mapsracer.java.map.MapPath;
 
 public class NodeCache {
 

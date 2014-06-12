@@ -1,4 +1,4 @@
-package at.tomtasche.mapsracer.data;
+package at.tomtasche.mapsracer.java.data;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -10,8 +10,8 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 
-import at.tomtasche.mapsracer.map.BoundingBox;
-import at.tomtasche.mapsracer.map.MapPath;
+import at.tomtasche.mapsracer.java.map.BoundingBox;
+import at.tomtasche.mapsracer.java.map.MapPath;
 
 public class NodeFetcher {
 

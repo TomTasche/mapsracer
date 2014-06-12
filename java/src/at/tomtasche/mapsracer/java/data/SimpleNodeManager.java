@@ -1,4 +1,4 @@
-package at.tomtasche.mapsracer.data;
+package at.tomtasche.mapsracer.java.data;
 
 import java.awt.Rectangle;
 import java.awt.geom.Point2D;
@@ -12,12 +12,12 @@ import java.util.Set;
 
 import org.jdesktop.swingx.mapviewer.GeoPosition;
 
-import at.tomtasche.mapsracer.map.BoundingBox;
-import at.tomtasche.mapsracer.map.MapManager;
-import at.tomtasche.mapsracer.map.MapNode;
-import at.tomtasche.mapsracer.map.MapPath;
-import at.tomtasche.mapsracer.math.CoordinateUtil;
-import at.tomtasche.mapsracer.ui.MapsRacer;
+import at.tomtasche.mapsracer.java.map.BoundingBox;
+import at.tomtasche.mapsracer.java.map.MapManager;
+import at.tomtasche.mapsracer.java.map.MapNode;
+import at.tomtasche.mapsracer.java.map.MapPath;
+import at.tomtasche.mapsracer.java.math.CoordinateUtil;
+import at.tomtasche.mapsracer.java.ui.MapsRacer;
 
 // need a better name for this...
 public class SimpleNodeManager implements NodeManager {

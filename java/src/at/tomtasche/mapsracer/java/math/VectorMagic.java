@@ -1,9 +1,9 @@
-package at.tomtasche.mapsracer.math;
+package at.tomtasche.mapsracer.java.math;
 
 import java.util.Iterator;
 import java.util.Set;
 
-import at.tomtasche.mapsracer.map.MapNode;
+import at.tomtasche.mapsracer.java.map.MapNode;
 
 public class VectorMagic {
 

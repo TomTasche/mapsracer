@@ -1,4 +1,4 @@
-package at.tomtasche.mapsracer.data;
+package at.tomtasche.mapsracer.java.data;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,9 +8,9 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import at.tomtasche.mapsracer.map.MapManager;
-import at.tomtasche.mapsracer.map.MapNode;
-import at.tomtasche.mapsracer.map.MapPath;
+import at.tomtasche.mapsracer.java.map.MapManager;
+import at.tomtasche.mapsracer.java.map.MapNode;
+import at.tomtasche.mapsracer.java.map.MapPath;
 
 public class ThreadedNodeManager implements NodeManager {
 

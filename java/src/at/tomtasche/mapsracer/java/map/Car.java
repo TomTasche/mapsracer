@@ -1,6 +1,6 @@
-package at.tomtasche.mapsracer.map;
+package at.tomtasche.mapsracer.java.map;
 
-import at.tomtasche.mapsracer.math.Vector2d;
+import at.tomtasche.mapsracer.java.math.Vector2d;
 
 public class Car {
 

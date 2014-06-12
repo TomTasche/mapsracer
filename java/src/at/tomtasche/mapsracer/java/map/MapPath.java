@@ -1,4 +1,4 @@
-package at.tomtasche.mapsracer.map;
+package at.tomtasche.mapsracer.java.map;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -7,7 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import at.tomtasche.mapsracer.data.Cluster;
+import at.tomtasche.mapsracer.java.data.Cluster;
 
 public class MapPath {
 

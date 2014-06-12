@@ -1,11 +1,11 @@
-package at.tomtasche.mapsracer.math;
+package at.tomtasche.mapsracer.java.math;
 
 import java.util.LinkedList;
 import java.util.List;
 
 import org.jdesktop.swingx.mapviewer.GeoPosition;
 
-import at.tomtasche.mapsracer.map.BoundingBox;
+import at.tomtasche.mapsracer.java.map.BoundingBox;
 
 public class CoordinateUtil {
 

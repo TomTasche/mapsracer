@@ -1,4 +1,4 @@
-package at.tomtasche.mapsracer.ui;
+package at.tomtasche.mapsracer.java.ui;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -13,8 +13,8 @@ import org.jdesktop.swingx.JXMapViewer;
 import org.jdesktop.swingx.mapviewer.GeoPosition;
 import org.jdesktop.swingx.painter.Painter;
 
-import at.tomtasche.mapsracer.map.MapNode;
-import at.tomtasche.mapsracer.map.MapPath;
+import at.tomtasche.mapsracer.java.map.MapNode;
+import at.tomtasche.mapsracer.java.map.MapPath;
 
 public class GraphPainter implements Painter<JXMapViewer> {
 
