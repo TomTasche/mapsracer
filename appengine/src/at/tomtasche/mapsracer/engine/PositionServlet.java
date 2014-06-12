@@ -1,0 +1,72 @@
+package at.tomtasche.mapsracer.engine;
+
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.google.appengine.api.memcache.MemcacheService;
+import com.google.appengine.api.memcache.MemcacheServiceFactory;
+
+@SuppressWarnings("serial")
+public class PositionServlet extends HttpServlet {
+
+	private static final String MEMCACHE_KEY_ALL_IDS = "all_ids";
+
+	private MemcacheService memcache;
+
+	public PositionServlet() {
+		memcache = MemcacheServiceFactory.getMemcacheService();
+	}
+
+	@Override
+	protected void doGet(HttpServletRequest request,
+			HttpServletResponse response) throws IOException {
+		response.setContentType("text/plain");
+		response.getWriter().println("Hello, world");
+	}
+
+	@Override
+	protected void doPost(HttpServletRequest request,
+			HttpServletResponse response) throws ServletException, IOException {
+		Position position = positionFromRequest(request);
+		String id = idFromRequest(request);
+
+		memcache.put(id, position);
+
+		// TODO: this is not how memcache is supposed to be used
+		// TODO: this set is growing infinitely until we run out of space!
+		Set<String> allIds = (Set<String>) memcache.get(MEMCACHE_KEY_ALL_IDS);
+		if (allIds == null) {
+			allIds = new HashSet<String>();
+		}
+		allIds.add(id);
+
+		memcache.put(MEMCACHE_KEY_ALL_IDS, allIds);
+	}
+
+	private Position positionFromRequest(HttpServletRequest request) {
+		String lat = request.getParameter("lat");
+		String lon = request.getParameter("lon");
+
+		Position position = new Position();
+		position.lat = lat;
+		position.lon = lon;
+
+		return position;
+	}
+
+	private String idFromRequest(HttpServletRequest request) {
+		return request.getParameter("id");
+	}
+
+	private class Position implements Serializable {
+		String lat;
+		String lon;
+	}
+}
