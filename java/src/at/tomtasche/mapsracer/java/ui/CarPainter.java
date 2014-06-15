@@ -58,6 +58,10 @@ public class CarPainter implements Painter<JXMapViewer> {
 		Collection<Car> carsCopy = new ArrayList<>(cars);
 		for (Car car : carsCopy) {
 			Vector2d lastPosition = car.getLastPosition();
+			if (lastPosition == null) {
+				return;
+			}
+
 			GeoPosition geoPosition = new GeoPosition(lastPosition.getY(),
 					lastPosition.getX());
 

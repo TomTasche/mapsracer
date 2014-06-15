@@ -1,7 +1,6 @@
 package at.tomtasche.mapsracer.engine;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -27,8 +26,19 @@ public class PositionServlet extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws IOException {
-		response.setContentType("text/plain");
-		response.getWriter().println("Hello, world");
+		Set<String> allIds = (Set<String>) memcache.get(MEMCACHE_KEY_ALL_IDS);
+		if (allIds == null) {
+			response.sendError(HttpServletResponse.SC_NOT_FOUND);
+
+			return;
+		}
+
+		// TODO: use json
+		for (String id : allIds) {
+			Position position = (Position) memcache.get(id);
+			response.getWriter().write(position.lat + ", " + position.lon);
+			response.getWriter().println();
+		}
 	}
 
 	@Override
@@ -63,10 +73,5 @@ public class PositionServlet extends HttpServlet {
 
 	private String idFromRequest(HttpServletRequest request) {
 		return request.getParameter("id");
-	}
-
-	private class Position implements Serializable {
-		String lat;
-		String lon;
 	}
 }

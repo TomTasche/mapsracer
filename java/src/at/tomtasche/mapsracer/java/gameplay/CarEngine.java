@@ -1,13 +1,16 @@
 package at.tomtasche.mapsracer.java.gameplay;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.jdesktop.swingx.mapviewer.GeoPosition;
+import java.util.UUID;
 
 import at.tomtasche.mapsracer.java.data.Cluster;
 import at.tomtasche.mapsracer.java.data.NodeManager;
@@ -21,6 +24,8 @@ import at.tomtasche.mapsracer.java.math.VectorMagic;
 import at.tomtasche.mapsracer.java.ui.MapsRacer;
 
 public class CarEngine implements Runnable {
+
+	private String id;
 
 	private Car significantCar;
 	private List<Car> allCars;
@@ -41,6 +46,8 @@ public class CarEngine implements Runnable {
 		this.mapManager = mapManager;
 
 		this.graph = nodeManager.getGraph();
+
+		id = UUID.randomUUID().toString();
 
 		engineThread = new Thread(this);
 		engineThread.start();
@@ -108,6 +115,13 @@ public class CarEngine implements Runnable {
 						/ length));
 
 				car.setLastPosition(position);
+
+				try {
+					pushPosition(position.setYX(position));
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 
 			if (significantCar != null) {
@@ -162,5 +176,21 @@ public class CarEngine implements Runnable {
 
 		return CoordinateUtil.contains(cluster.getBoundingBox(),
 				position.getY(), position.getX());
+	}
+
+	private void pushPosition(Vector2d position) throws IOException {
+		HttpURLConnection connection = (HttpURLConnection) new URL(
+				"https://mapsracer.appspot.com/position").openConnection();
+		connection.setRequestMethod("POST");
+		connection.setDoOutput(true);
+
+		String parameters = "lat=" + position.getX() + "&lon="
+				+ position.getY() + "&id=" + id;
+
+		connection.getOutputStream().write(
+				parameters.getBytes(Charset.forName("UTF-8")));
+		connection.getOutputStream().flush();
+
+		System.out.println(connection.getResponseCode() + "");
 	}
 }
