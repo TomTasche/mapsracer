@@ -117,7 +117,7 @@ public class MapsRacer {
 
 		engine.initialize(nodeManager, mapManager);
 
-		carPainter.initialize();
+		carPainter.initialize(engine.getAllCars());
 		graphPainter.initialize(nodeManager.getStreets());
 		clusterPainter.initialize(nodeManager.getClusters());
 
@@ -137,8 +137,7 @@ public class MapsRacer {
 				car.setTo(end);
 				car.setDistance(0);
 
-				engine.addCar(car, true);
-				carPainter.addCar(car);
+//				engine.addCar(car, true);
 			}
 		});
 

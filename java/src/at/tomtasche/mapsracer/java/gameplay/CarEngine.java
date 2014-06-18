@@ -1,13 +1,14 @@
 package at.tomtasche.mapsracer.java.gameplay;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -25,10 +26,8 @@ import at.tomtasche.mapsracer.java.ui.MapsRacer;
 
 public class CarEngine implements Runnable {
 
-	private String id;
-
 	private Car significantCar;
-	private List<Car> allCars;
+	private Map<String, Car> allCars;
 
 	private NodeManager nodeManager;
 	private Map<MapNode, Set<MapNode>> graph;
@@ -38,7 +37,7 @@ public class CarEngine implements Runnable {
 	private Thread engineThread;
 
 	public CarEngine() {
-		this.allCars = new LinkedList<>();
+		this.allCars = new HashMap<>();
 	}
 
 	public void initialize(NodeManager nodeManager, MapManager mapManager) {
@@ -47,20 +46,32 @@ public class CarEngine implements Runnable {
 
 		this.graph = nodeManager.getGraph();
 
-		id = UUID.randomUUID().toString();
-
 		engineThread = new Thread(this);
 		engineThread.start();
 	}
 
+	public Map<String, Car> getAllCars() {
+		return allCars;
+	}
+
 	public void addCar(Car car, boolean signifcant) {
-		if (significantCar != null) {
-			throw new IllegalArgumentException("significant car already set!");
+		if (signifcant) {
+			if (significantCar != null) {
+				throw new IllegalArgumentException(
+						"significant car already set!");
+			}
+
+			String id = UUID.randomUUID().toString();
+			car.setId(id);
+
+			significantCar = car;
 		}
 
-		allCars.add(car);
+		if (car.getId() == null) {
+			throw new IllegalArgumentException("no id set for car");
+		}
 
-		significantCar = car;
+		allCars.put(car.getId(), car);
 	}
 
 	@Override
@@ -77,8 +88,16 @@ public class CarEngine implements Runnable {
 
 			lastNano = tmp;
 
-			Collection<Car> carsCopy = new ArrayList<>(allCars);
+			Collection<Car> carsCopy = new ArrayList<>();
+			// TODO: this is not possible currently, because devices fetched
+			// from the server don't have from- and to-fields set
+			// carsCopy.addAll(allCars.values());
+			carsCopy.add(significantCar);
 			for (Car car : carsCopy) {
+				if (car == null) {
+					continue;
+				}
+
 				double newDistance = car.getDistance() + car.getVelocity()
 						* time;
 
@@ -115,13 +134,6 @@ public class CarEngine implements Runnable {
 						/ length));
 
 				car.setLastPosition(position);
-
-				try {
-					pushPosition(position.setYX(position));
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
 			}
 
 			if (significantCar != null) {
@@ -159,14 +171,30 @@ public class CarEngine implements Runnable {
 
 					nodeManager.moveClusters(moveDirection);
 				}
+
+				try {
+					Vector2d position = significantCar.getLastPosition();
+					position = position.setYX(position);
+					// TODO: make async
+					pushPosition(significantCar.getId(), position);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 
+			/*
+			 * try { Thread.sleep(25); } catch (InterruptedException e) {
+			 * e.printStackTrace();
+			 * 
+			 * break; }
+			 */
+			// TODO: make async, sleep thread for 25ms
 			try {
-				Thread.sleep(25);
-			} catch (InterruptedException e) {
+				fetchPositions();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
 				e.printStackTrace();
-
-				break;
 			}
 		} while (true);
 	}
@@ -178,7 +206,7 @@ public class CarEngine implements Runnable {
 				position.getY(), position.getX());
 	}
 
-	private void pushPosition(Vector2d position) throws IOException {
+	private void pushPosition(String id, Vector2d position) throws IOException {
 		HttpURLConnection connection = (HttpURLConnection) new URL(
 				"https://mapsracer.appspot.com/position").openConnection();
 		connection.setRequestMethod("POST");
@@ -191,6 +219,54 @@ public class CarEngine implements Runnable {
 				parameters.getBytes(Charset.forName("UTF-8")));
 		connection.getOutputStream().flush();
 
-		System.out.println(connection.getResponseCode() + "");
+		if (MapsRacer.DEBUG) {
+			System.out.println("pushed with code: "
+					+ connection.getResponseCode());
+		}
+	}
+
+	private void fetchPositions() throws IOException {
+		HttpURLConnection connection = (HttpURLConnection) new URL(
+				"https://mapsracer.appspot.com/position").openConnection();
+		connection.setRequestMethod("GET");
+
+		InputStreamReader streamReader = new InputStreamReader(
+				connection.getInputStream());
+		BufferedReader bufferedReader = new BufferedReader(streamReader);
+		for (String s = bufferedReader.readLine(); s != null; s = bufferedReader
+				.readLine()) {
+			String[] splitString = s.split(";");
+
+			String id = splitString[0];
+			if (significantCar != null && significantCar.getId().equals(id)) {
+				continue;
+			}
+
+			double lat = Double.parseDouble(splitString[1]);
+			double lon = Double.parseDouble(splitString[2]);
+
+			Vector2d position = new Vector2d(lat, lon);
+
+			position = position.setYX(position);
+
+			Car car = allCars.get(id);
+			if (car == null) {
+				if (MapsRacer.DEBUG) {
+					System.out.println("new car joined with id: " + id);
+				}
+
+				car = new Car();
+				car.setId(id);
+
+				allCars.put(id, car);
+			}
+
+			car.setLastPosition(position);
+
+			if (MapsRacer.DEBUG) {
+				System.out.println("updated position for id: " + id);
+			}
+		}
+
 	}
 }

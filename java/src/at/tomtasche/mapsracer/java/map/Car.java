@@ -4,12 +4,24 @@ import at.tomtasche.mapsracer.java.math.Vector2d;
 
 public class Car {
 
+	private String id;
+
 	private MapNode from;
 	private MapNode to;
+
 	private double distance;
 	private double velocity;
 	private double direction;
+
 	private Vector2d lastPosition;
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
 
 	public MapNode getFrom() {
 		return from;

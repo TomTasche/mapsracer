@@ -36,7 +36,7 @@ public class PositionServlet extends HttpServlet {
 		// TODO: use json
 		for (String id : allIds) {
 			Position position = (Position) memcache.get(id);
-			response.getWriter().write(position.lat + ", " + position.lon);
+			response.getWriter().write(id + ";" + position.lat + ";" + position.lon);
 			response.getWriter().println();
 		}
 	}

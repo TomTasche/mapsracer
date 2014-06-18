@@ -10,8 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Map;
 
 import javax.imageio.ImageIO;
 
@@ -24,24 +23,18 @@ import at.tomtasche.mapsracer.java.math.Vector2d;
 
 public class CarPainter implements Painter<JXMapViewer> {
 
-	private List<Car> cars;
-
 	private BufferedImage carIcon;
 
-	public CarPainter() {
-		this.cars = new LinkedList<>();
-	}
+	private Map<String, Car> allCars;
 
-	public void initialize() {
+	public void initialize(Map<String, Car> allCars) {
+		this.allCars = allCars;
+
 		try {
 			carIcon = ImageIO.read(new File("car.png"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	}
-
-	public void addCar(Car car) {
-		cars.add(car);
 	}
 
 	@Override
@@ -55,7 +48,7 @@ public class CarPainter implements Painter<JXMapViewer> {
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
 				RenderingHints.VALUE_ANTIALIAS_ON);
 
-		Collection<Car> carsCopy = new ArrayList<>(cars);
+		Collection<Car> carsCopy = new ArrayList<>(allCars.values());
 		for (Car car : carsCopy) {
 			Vector2d lastPosition = car.getLastPosition();
 			if (lastPosition == null) {
@@ -76,7 +69,7 @@ public class CarPainter implements Painter<JXMapViewer> {
 						20);
 			}
 
-			if (MapsRacer.DEBUG) {
+			if (MapsRacer.DEBUG && car.getFrom() != null && car.getTo() != null) {
 				geoPosition = new GeoPosition(car.getFrom().getyLat(), car
 						.getFrom().getxLon());
 
