@@ -61,7 +61,7 @@ public class CarPainter implements Painter<JXMapViewer> {
 			Point2D pt = map.getTileFactory().geoToPixel(geoPosition,
 					map.getZoom());
 
-			if (carIcon != null) {
+			if (car.isSignificant() && carIcon != null) {
 				g.drawImage(carIcon, (int) (pt.getX() - 20),
 						(int) (pt.getY() - 20), null);
 			} else {

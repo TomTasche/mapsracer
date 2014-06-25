@@ -64,6 +64,8 @@ public class CarEngine implements Runnable {
 			String id = UUID.randomUUID().toString();
 			car.setId(id);
 
+			car.setSignificant(true);
+
 			significantCar = car;
 		}
 

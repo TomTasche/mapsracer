@@ -15,6 +15,8 @@ public class Car {
 
 	private Vector2d lastPosition;
 
+	private boolean significant;
+
 	public String getId() {
 		return id;
 	}
@@ -69,5 +71,13 @@ public class Car {
 
 	public void setLastPosition(Vector2d lastPosition) {
 		this.lastPosition = lastPosition;
+	}
+
+	public boolean isSignificant() {
+		return significant;
+	}
+
+	public void setSignificant(boolean significant) {
+		this.significant = significant;
 	}
 }
