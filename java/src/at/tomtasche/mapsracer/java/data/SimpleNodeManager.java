@@ -258,4 +258,9 @@ public class SimpleNodeManager implements NodeManager {
 	public Map<MapNode, Set<MapNode>> getGraph() {
 		return Collections.unmodifiableMap(cache.getGraph());
 	}
+
+	@Override
+	public Map<Long, MapNode> getNodes() {
+		return Collections.unmodifiableMap(cache.getNodes());
+	}
 }

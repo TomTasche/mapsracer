@@ -20,6 +20,8 @@ public interface NodeManager {
 
 	public Map<MapNode, Set<MapNode>> getGraph();
 
+	public Map<Long, MapNode> getNodes();
+
 	public Cluster getCluster(Direction direction);
 
 	public enum Direction {

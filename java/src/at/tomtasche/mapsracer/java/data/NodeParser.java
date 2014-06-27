@@ -58,7 +58,7 @@ public class NodeParser {
 					lwxmlReader.readEvent();
 					double lon = Double.parseDouble(lwxmlReader.readValue());
 
-					MapNode node = new MapNode(lon, lat, cluster);
+					MapNode node = new MapNode(id, lon, lat, cluster);
 					nodes.put(id, node);
 				} else if (value.equals("way")) {
 					lwxmlReader.readEvent();

@@ -1,6 +1,7 @@
 package at.tomtasche.mapsracer.java.gameplay;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -31,6 +32,7 @@ public class CarEngine implements Runnable {
 
 	private NodeManager nodeManager;
 	private Map<MapNode, Set<MapNode>> graph;
+	private Map<Long, MapNode> nodes;
 
 	private MapManager mapManager;
 
@@ -45,6 +47,7 @@ public class CarEngine implements Runnable {
 		this.mapManager = mapManager;
 
 		this.graph = nodeManager.getGraph();
+		this.nodes = nodeManager.getNodes();
 
 		engineThread = new Thread(this);
 		engineThread.start();
@@ -97,6 +100,10 @@ public class CarEngine implements Runnable {
 			carsCopy.add(significantCar);
 			for (Car car : carsCopy) {
 				if (car == null) {
+					continue;
+				}
+
+				if (car.getFrom() == null || car.getTo() == null) {
 					continue;
 				}
 
@@ -175,28 +182,26 @@ public class CarEngine implements Runnable {
 				}
 
 				try {
-					Vector2d position = significantCar.getLastPosition();
-					position = position.setYX(position);
 					// TODO: make async
-					pushPosition(significantCar.getId(), position);
+					pushPosition(significantCar);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
 
-			/*
-			 * try { Thread.sleep(25); } catch (InterruptedException e) {
-			 * e.printStackTrace();
-			 * 
-			 * break; }
-			 */
 			// TODO: make async, sleep thread for 25ms
 			try {
 				fetchPositions();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				if (e instanceof FileNotFoundException) {
+					if (MapsRacer.DEBUG) {
+						System.out.println("no positions on server");
+					}
+				} else {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		} while (true);
 	}
@@ -208,14 +213,18 @@ public class CarEngine implements Runnable {
 				position.getY(), position.getX());
 	}
 
-	private void pushPosition(String id, Vector2d position) throws IOException {
+	private void pushPosition(Car car) throws IOException {
 		HttpURLConnection connection = (HttpURLConnection) new URL(
 				"https://mapsracer.appspot.com/position").openConnection();
 		connection.setRequestMethod("POST");
 		connection.setDoOutput(true);
 
+		Vector2d position = significantCar.getLastPosition();
+		position = position.setYX(position);
+
 		String parameters = "lat=" + position.getX() + "&lon="
-				+ position.getY() + "&id=" + id;
+				+ position.getY() + "&id=" + car.getId() + "&from="
+				+ car.getFrom().getId() + "&to=" + car.getTo().getId();
 
 		connection.getOutputStream().write(
 				parameters.getBytes(Charset.forName("UTF-8")));
@@ -238,6 +247,9 @@ public class CarEngine implements Runnable {
 		for (String s = bufferedReader.readLine(); s != null; s = bufferedReader
 				.readLine()) {
 			String[] splitString = s.split(";");
+			if (splitString.length < 5) {
+				continue;
+			}
 
 			String id = splitString[0];
 			if (significantCar != null && significantCar.getId().equals(id)) {
@@ -246,6 +258,12 @@ public class CarEngine implements Runnable {
 
 			double lat = Double.parseDouble(splitString[1]);
 			double lon = Double.parseDouble(splitString[2]);
+
+			long from = Long.parseLong(splitString[3]);
+			long to = Long.parseLong(splitString[4]);
+
+			MapNode fromNode = nodes.get(from);
+			MapNode toNode = nodes.get(to);
 
 			Vector2d position = new Vector2d(lat, lon);
 
@@ -264,6 +282,9 @@ public class CarEngine implements Runnable {
 			}
 
 			car.setLastPosition(position);
+
+			car.setFrom(fromNode);
+			car.setTo(toNode);
 
 			if (MapsRacer.DEBUG) {
 				System.out.println("updated position for id: " + id);

@@ -137,7 +137,7 @@ public class MapsRacer {
 				car.setTo(end);
 				car.setDistance(0);
 
-//				engine.addCar(car, true);
+				engine.addCar(car, true);
 			}
 		});
 

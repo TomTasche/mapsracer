@@ -4,8 +4,11 @@ import java.io.Serializable;
 
 public class Position implements Serializable {
 
-	private static final long serialVersionUID = -1283015436892669410L;
+	private static final long serialVersionUID = -643640682461196951L;
 
-	public String lat;
-	public String lon;
+	public double lat;
+	public double lon;
+
+	public long from;
+	public long to;
 }

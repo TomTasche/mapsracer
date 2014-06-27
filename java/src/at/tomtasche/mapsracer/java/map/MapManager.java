@@ -23,7 +23,6 @@ public class MapManager {
 	public void initialize(JXMapViewer mapViewer, NodeManager nodeManager) {
 		this.mapViewer = mapViewer;
 		this.nodeManager = nodeManager;
-
 	}
 
 	public void moveViewport(Direction direction) {

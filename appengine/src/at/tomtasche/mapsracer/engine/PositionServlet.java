@@ -36,7 +36,9 @@ public class PositionServlet extends HttpServlet {
 		// TODO: use json
 		for (String id : allIds) {
 			Position position = (Position) memcache.get(id);
-			response.getWriter().write(id + ";" + position.lat + ";" + position.lon);
+			response.getWriter().write(
+					id + ";" + position.lat + ";" + position.lon + ";"
+							+ position.from + ";" + position.to);
 			response.getWriter().println();
 		}
 	}
@@ -61,12 +63,17 @@ public class PositionServlet extends HttpServlet {
 	}
 
 	private Position positionFromRequest(HttpServletRequest request) {
+		String from = request.getParameter("from");
+		String to = request.getParameter("to");
+
 		String lat = request.getParameter("lat");
 		String lon = request.getParameter("lon");
 
 		Position position = new Position();
-		position.lat = lat;
-		position.lon = lon;
+		position.lat = Double.parseDouble(lat);
+		position.lon = Double.parseDouble(lon);
+		position.from = Long.parseLong(from);
+		position.to = Long.parseLong(to);
 
 		return position;
 	}

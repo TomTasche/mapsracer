@@ -70,6 +70,11 @@ public class ThreadedNodeManager implements NodeManager {
 	}
 
 	@Override
+	public Map<Long, MapNode> getNodes() {
+		return nodeManager.getNodes();
+	}
+
+	@Override
 	public Cluster getCluster(Direction direction) {
 		return nodeManager.getCluster(direction);
 	}
