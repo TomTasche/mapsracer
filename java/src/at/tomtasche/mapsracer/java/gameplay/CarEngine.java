@@ -1,12 +1,5 @@
 package at.tomtasche.mapsracer.java.gameplay;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -34,7 +27,6 @@ public class CarEngine implements Runnable {
 
 	private NodeManager nodeManager;
 	private Map<MapNode, Set<MapNode>> graph;
-	private Map<Long, MapNode> nodes;
 
 	private MapManager mapManager;
 
@@ -49,7 +41,6 @@ public class CarEngine implements Runnable {
 		this.mapManager = mapManager;
 
 		this.graph = nodeManager.getGraph();
-		this.nodes = nodeManager.getNodes();
 
 		engineThread = new Thread(this);
 		engineThread.start();
@@ -180,28 +171,6 @@ public class CarEngine implements Runnable {
 
 					nodeManager.moveClusters(moveDirection);
 				}
-
-				try {
-					// TODO: make async
-					pushPosition(significantCar);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-
-			// TODO: make async, sleep thread for 25ms
-			try {
-				fetchPositions();
-			} catch (IOException e) {
-				if (e instanceof FileNotFoundException) {
-					if (MapsRacer.DEBUG) {
-						System.out.println("no positions on server");
-					}
-				} else {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
 			}
 		} while (true);
 	}
@@ -211,86 +180,5 @@ public class CarEngine implements Runnable {
 
 		return CoordinateUtil.contains(cluster.getBoundingBox(),
 				position.getY(), position.getX());
-	}
-
-	private void pushPosition(Car car) throws IOException {
-		HttpURLConnection connection = (HttpURLConnection) new URL(
-				"https://mapsracer.appspot.com/position").openConnection();
-		connection.setRequestMethod("POST");
-		connection.setDoOutput(true);
-
-		Vector2d position = significantCar.getLastPosition();
-		position = position.setYX(position);
-
-		String parameters = "lat=" + position.getX() + "&lon="
-				+ position.getY() + "&id=" + car.getId() + "&from="
-				+ car.getFrom().getId() + "&to=" + car.getTo().getId();
-
-		connection.getOutputStream().write(
-				parameters.getBytes(Charset.forName("UTF-8")));
-		connection.getOutputStream().flush();
-
-		if (MapsRacer.DEBUG) {
-			System.out.println("pushed with code: "
-					+ connection.getResponseCode());
-		}
-	}
-
-	private void fetchPositions() throws IOException {
-		HttpURLConnection connection = (HttpURLConnection) new URL(
-				"https://mapsracer.appspot.com/position").openConnection();
-		connection.setRequestMethod("GET");
-
-		InputStreamReader streamReader = new InputStreamReader(
-				connection.getInputStream());
-		BufferedReader bufferedReader = new BufferedReader(streamReader);
-		for (String s = bufferedReader.readLine(); s != null; s = bufferedReader
-				.readLine()) {
-			String[] splitString = s.split(";");
-			if (splitString.length < 5) {
-				continue;
-			}
-
-			String id = splitString[0];
-			if (significantCar != null && significantCar.getId().equals(id)) {
-				continue;
-			}
-
-			double lat = Double.parseDouble(splitString[1]);
-			double lon = Double.parseDouble(splitString[2]);
-
-			long from = Long.parseLong(splitString[3]);
-			long to = Long.parseLong(splitString[4]);
-
-			MapNode fromNode = nodes.get(from);
-			MapNode toNode = nodes.get(to);
-
-			Vector2d position = new Vector2d(lat, lon);
-
-			position = position.setYX(position);
-
-			Car car = allCars.get(id);
-			if (car == null) {
-				if (MapsRacer.DEBUG) {
-					System.out.println("new car joined with id: " + id);
-				}
-
-				car = new Car();
-				car.setId(id);
-				car.setVelocity(CAR_VELOCITY);
-
-				allCars.put(id, car);
-			}
-
-			car.setLastPosition(position);
-
-			car.setFrom(fromNode);
-			car.setTo(toNode);
-
-			if (MapsRacer.DEBUG) {
-				System.out.println("updated position for id: " + id);
-			}
-		}
-
 	}
 }

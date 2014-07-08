@@ -6,19 +6,11 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
 
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
-import javax.swing.event.MouseInputListener;
 
 import org.jdesktop.swingx.JXMapViewer;
-import org.jdesktop.swingx.OSMTileFactoryInfo;
-import org.jdesktop.swingx.input.PanMouseInputListener;
-import org.jdesktop.swingx.mapviewer.DefaultTileFactory;
-import org.jdesktop.swingx.mapviewer.GeoPosition;
-import org.jdesktop.swingx.mapviewer.TileFactoryInfo;
-import org.jdesktop.swingx.painter.CompoundPainter;
 
 import at.tomtasche.mapsracer.java.data.ThreadedNodeManager;
 import at.tomtasche.mapsracer.java.data.ThreadedNodeManager.NodeManagerListener;
@@ -29,7 +21,7 @@ import at.tomtasche.mapsracer.java.map.MapNode;
 
 public class MapsRacer {
 
-	public static final boolean DEBUG = true;
+	public static final boolean DEBUG = false;
 
 	private static JFrame frame;
 
