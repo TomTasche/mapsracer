@@ -6,6 +6,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
@@ -28,8 +29,6 @@ import at.tomtasche.mapsracer.java.map.MapNode;
 
 public class MapsRacer {
 
-	private static final int CAR_VELOCITY = 100;
-
 	public static final boolean DEBUG = true;
 
 	private static JFrame frame;
@@ -39,11 +38,6 @@ public class MapsRacer {
 	private static MapManager mapManager;
 
 	private static CarEngine engine;
-
-	private static JXMapViewer mapViewer;
-	private static CarPainter carPainter;
-	private static GraphPainter graphPainter;
-	private static ClusterPainter clusterPainter;
 
 	private static Thread repaintThread;
 
@@ -59,45 +53,8 @@ public class MapsRacer {
 
 		mapManager = new MapManager();
 
-		mapViewer = new JXMapViewer();
-
-		TileFactoryInfo info = new OSMTileFactoryInfo();
-		DefaultTileFactory tileFactory = new DefaultTileFactory(info);
-		tileFactory.setThreadPoolSize(8);
-
-		mapViewer.setTileFactory(tileFactory);
-
-		mapViewer.setAddressLocation(new GeoPosition(48.14650327493638,
-				16.329095363616943));
-
-		mapViewer.setZoom(3);
-
-		carPainter = new CarPainter();
-		graphPainter = new GraphPainter();
-		clusterPainter = new ClusterPainter();
-
-		CompoundPainter<JXMapViewer> painter = new CompoundPainter<JXMapViewer>();
-		painter.addPainter(carPainter);
-		if (DEBUG) {
-			painter.addPainter(graphPainter);
-			painter.addPainter(clusterPainter);
-		}
-
-		mapViewer.setOverlayPainter(painter);
-
-		if (DEBUG) {
-			MouseInputListener mouseListener = new PanMouseInputListener(
-					mapViewer);
-			mapViewer.addMouseListener(mouseListener);
-			mapViewer.addMouseMotionListener(mouseListener);
-		}
-
 		frame = new JFrame();
 		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-		frame.add(mapViewer);
-		frame.setResizable(DEBUG);
-		frame.setSize(768, 768);
-
 		frame.addWindowListener(new WindowAdapter() {
 
 			@Override
@@ -108,18 +65,20 @@ public class MapsRacer {
 			}
 		});
 
+		mapManager.initialize(nodeManager, engine.getAllCars());
+
+		JXMapViewer mapViewer = mapManager.getMapViewer();
+
+		frame.add(mapViewer);
+		frame.setResizable(DEBUG);
+		frame.setSize(768, 768);
+
 		// always display window before initializing NodeManager, because
 		// otherwise JXMapViewer.getViewportBounds() is empty and we are not
 		// able to calculate cluster-sizes
 		frame.setVisible(true);
 
-		mapManager.initialize(mapViewer, nodeManager);
-
 		engine.initialize(nodeManager, mapManager);
-
-		carPainter.initialize(engine.getAllCars());
-		graphPainter.initialize(nodeManager.getStreets());
-		clusterPainter.initialize(nodeManager.getClusters());
 
 		car = new Car();
 
@@ -132,7 +91,7 @@ public class MapsRacer {
 				MapNode end = nodeManager.getGraph().get(start).iterator()
 						.next();
 
-				car.setVelocity(CAR_VELOCITY);
+				car.setVelocity(CarEngine.CAR_VELOCITY);
 				car.setFrom(start);
 				car.setTo(end);
 				car.setDistance(0);
@@ -166,6 +125,8 @@ public class MapsRacer {
 		mapViewer.requestFocusInWindow();
 		mapViewer.addKeyListener(new KeyAdapter() {
 
+			boolean halted = false;
+
 			@Override
 			public void keyPressed(KeyEvent e) {
 				switch (e.getKeyCode()) {
@@ -178,6 +139,16 @@ public class MapsRacer {
 				case KeyEvent.VK_DOWN:
 					car.setVelocity(0);
 					break;
+				case KeyEvent.VK_SPACE:
+					if (halted) {
+						car.setVelocity(CarEngine.CAR_VELOCITY);
+					} else {
+						car.setVelocity(0);
+					}
+
+					halted = !halted;
+
+					break;
 				}
 			}
 
@@ -189,7 +160,7 @@ public class MapsRacer {
 					car.setDirection(0);
 					break;
 				case KeyEvent.VK_DOWN:
-					car.setVelocity(CAR_VELOCITY);
+					car.setVelocity(CarEngine.CAR_VELOCITY);
 					break;
 				}
 			}

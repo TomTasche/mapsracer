@@ -27,6 +27,8 @@ import at.tomtasche.mapsracer.java.ui.MapsRacer;
 
 public class CarEngine implements Runnable {
 
+	public static final int CAR_VELOCITY = 25;
+
 	private Car significantCar;
 	private Map<String, Car> allCars;
 
@@ -94,9 +96,7 @@ public class CarEngine implements Runnable {
 			lastNano = tmp;
 
 			Collection<Car> carsCopy = new ArrayList<>();
-			// TODO: this is not possible currently, because devices fetched
-			// from the server don't have from- and to-fields set
-			// carsCopy.addAll(allCars.values());
+			carsCopy.addAll(allCars.values());
 			carsCopy.add(significantCar);
 			for (Car car : carsCopy) {
 				if (car == null) {
@@ -277,6 +277,7 @@ public class CarEngine implements Runnable {
 
 				car = new Car();
 				car.setId(id);
+				car.setVelocity(CAR_VELOCITY);
 
 				allCars.put(id, car);
 			}
