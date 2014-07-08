@@ -23,7 +23,8 @@ import at.tomtasche.mapsracer.java.math.Vector2d;
 
 public class CarPainter implements Painter<JXMapViewer> {
 
-	private BufferedImage carIcon;
+	private BufferedImage myCarIcon;
+	private BufferedImage otherCarIcon;
 
 	private Map<String, Car> allCars;
 
@@ -31,7 +32,8 @@ public class CarPainter implements Painter<JXMapViewer> {
 		this.allCars = allCars;
 
 		try {
-			carIcon = ImageIO.read(new File("car.png"));
+			myCarIcon = ImageIO.read(new File("my_car.png"));
+			otherCarIcon = ImageIO.read(new File("other_car.png"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -61,12 +63,12 @@ public class CarPainter implements Painter<JXMapViewer> {
 			Point2D pt = map.getTileFactory().geoToPixel(geoPosition,
 					map.getZoom());
 
-			if (car.isSignificant() && carIcon != null) {
-				g.drawImage(carIcon, (int) (pt.getX() - 20),
+			if (car.isSignificant()) {
+				g.drawImage(myCarIcon, (int) (pt.getX() - 20),
 						(int) (pt.getY() - 20), null);
 			} else {
-				g.fillOval((int) (pt.getX() - 10), (int) (pt.getY() - 10), 20,
-						20);
+				g.drawImage(otherCarIcon, (int) (pt.getX() - 20),
+						(int) (pt.getY() - 20), null);
 			}
 
 			if (MapsRacer.DEBUG && car.getFrom() != null && car.getTo() != null) {
