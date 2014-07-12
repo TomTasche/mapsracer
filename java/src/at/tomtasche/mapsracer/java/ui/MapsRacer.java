@@ -12,6 +12,7 @@ import javax.swing.WindowConstants;
 
 import org.jdesktop.swingx.JXMapViewer;
 
+import at.tomtasche.mapsracer.java.data.OnlineCarEngine;
 import at.tomtasche.mapsracer.java.data.ThreadedNodeManager;
 import at.tomtasche.mapsracer.java.data.ThreadedNodeManager.NodeManagerListener;
 import at.tomtasche.mapsracer.java.gameplay.CarEngine;
@@ -30,6 +31,7 @@ public class MapsRacer {
 	private static MapManager mapManager;
 
 	private static CarEngine engine;
+	private static OnlineCarEngine onlineCarEngine;
 
 	private static Thread repaintThread;
 
@@ -40,6 +42,7 @@ public class MapsRacer {
 		cacheDirectory.mkdir();
 
 		engine = new CarEngine();
+		onlineCarEngine = new OnlineCarEngine();
 
 		nodeManager = new ThreadedNodeManager(cacheDirectory);
 
@@ -58,6 +61,7 @@ public class MapsRacer {
 		});
 
 		mapManager.initialize(nodeManager, engine.getAllCars());
+		onlineCarEngine.initialize(nodeManager, engine.getAllCars());
 
 		JXMapViewer mapViewer = mapManager.getMapViewer();
 
