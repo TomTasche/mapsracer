@@ -37,7 +37,7 @@ public class SimpleNodeManager implements NodeManager {
 	}
 
 	@Override
-	public void initialize(MapManager mapManager) {
+	public synchronized void initialize(MapManager mapManager) {
 		this.mapManager = mapManager;
 
 		fetchCluster(Direction.CENTER);
@@ -46,7 +46,7 @@ public class SimpleNodeManager implements NodeManager {
 	}
 
 	@Override
-	public void moveClusters(Direction direction) {
+	public synchronized void moveClusters(Direction direction) {
 		if (direction == Direction.CENTER) {
 			System.err.println("what are you doing?");
 			return;

@@ -77,6 +77,17 @@ public class CarEngine implements Runnable {
 		long lastNano = -1;
 
 		do {
+			if (allCars.isEmpty() && significantCar == null) {
+				try {
+					Thread.sleep(50);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+				continue;
+			}
+
 			long tmp = System.nanoTime();
 			if (lastNano == -1) {
 				lastNano = tmp;

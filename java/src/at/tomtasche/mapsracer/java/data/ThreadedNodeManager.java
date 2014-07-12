@@ -30,7 +30,7 @@ public class ThreadedNodeManager implements NodeManager {
 
 	@Override
 	public void initialize(final MapManager mapManager) {
-		threadExecutor = Executors.newFixedThreadPool(5);
+		threadExecutor = Executors.newFixedThreadPool(1);
 
 		threadExecutor.execute(new Runnable() {
 
