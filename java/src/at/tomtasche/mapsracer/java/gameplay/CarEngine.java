@@ -2,6 +2,7 @@ package at.tomtasche.mapsracer.java.gameplay;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -33,7 +34,8 @@ public class CarEngine implements Runnable {
 	private Thread engineThread;
 
 	public CarEngine() {
-		this.allCars = new HashMap<>();
+		HashMap<String, Car> temp = new HashMap<>();
+		this.allCars = Collections.synchronizedMap(temp);
 	}
 
 	public void initialize(NodeManager nodeManager, MapManager mapManager) {
@@ -42,7 +44,7 @@ public class CarEngine implements Runnable {
 
 		this.graph = nodeManager.getGraph();
 
-		engineThread = new Thread(this);
+		engineThread = new Thread(this, "CarEngine");
 		engineThread.start();
 	}
 

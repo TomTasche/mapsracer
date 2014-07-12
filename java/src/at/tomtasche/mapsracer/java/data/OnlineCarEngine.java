@@ -30,7 +30,7 @@ public class OnlineCarEngine implements Runnable {
 
 		this.nodes = nodeManager.getNodes();
 
-		networkThread = new Thread(this);
+		networkThread = new Thread(this, "OnlineCarEngine");
 		networkThread.start();
 	}
 

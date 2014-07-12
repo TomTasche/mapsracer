@@ -11,6 +11,7 @@ import java.util.concurrent.Executors;
 import at.tomtasche.mapsracer.java.map.MapManager;
 import at.tomtasche.mapsracer.java.map.MapNode;
 import at.tomtasche.mapsracer.java.map.MapPath;
+import at.tomtasche.mapsracer.java.ui.MapsRacer;
 
 public class ThreadedNodeManager implements NodeManager {
 
@@ -19,6 +20,8 @@ public class ThreadedNodeManager implements NodeManager {
 	private ExecutorService threadExecutor;
 
 	private NodeManagerListener listener;
+
+	private boolean movingClusters = false;
 
 	public ThreadedNodeManager(File cacheDirectory) throws IOException {
 		nodeManager = new SimpleNodeManager(cacheDirectory);
@@ -45,11 +48,24 @@ public class ThreadedNodeManager implements NodeManager {
 
 	@Override
 	public void moveClusters(final Direction direction) {
+		if (movingClusters) {
+			if (MapsRacer.DEBUG) {
+				System.out.println("skipped request to move clusters to "
+						+ direction + " because clusters are still moving");
+			}
+
+			return;
+		}
+
+		movingClusters = true;
+
 		threadExecutor.execute(new Runnable() {
 
 			@Override
 			public void run() {
 				nodeManager.moveClusters(direction);
+
+				movingClusters = false;
 			}
 		});
 	}
