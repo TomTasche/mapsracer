@@ -45,7 +45,7 @@ public class OnlineCarEngine implements Runnable {
 			carsCopy.addAll(allCars.values());
 			for (Car car : carsCopy) {
 				if (!car.isSignificant()) {
-					return;
+					continue;
 				}
 
 				try {
@@ -95,6 +95,7 @@ public class OnlineCarEngine implements Runnable {
 		connection.getOutputStream().write(
 				parameters.getBytes(Charset.forName("UTF-8")));
 		connection.getOutputStream().flush();
+		connection.getOutputStream().close();
 
 		if (MapsRacer.DEBUG) {
 			System.out.println("pushed with code: "
@@ -157,5 +158,8 @@ public class OnlineCarEngine implements Runnable {
 				System.out.println("updated position for id: " + id);
 			}
 		}
+		
+		bufferedReader.close();
+		streamReader.close();
 	}
 }
