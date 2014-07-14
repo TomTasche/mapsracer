@@ -101,6 +101,10 @@ public class OnlineCarEngine implements Runnable {
 			System.out.println("pushed with code: "
 					+ connection.getResponseCode());
 		}
+
+		connection.getInputStream().close();
+
+		connection.disconnect();
 	}
 
 	private void fetchPositions(Car significantCar) throws IOException {
@@ -158,8 +162,10 @@ public class OnlineCarEngine implements Runnable {
 				System.out.println("updated position for id: " + id);
 			}
 		}
-		
+
 		bufferedReader.close();
 		streamReader.close();
+
+		connection.disconnect();
 	}
 }
